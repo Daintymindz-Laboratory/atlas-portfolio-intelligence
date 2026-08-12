@@ -1,4 +1,4 @@
-# Atlas Portfolio Intelligence — Client-Ready Prototype
+# Atlas Portfolio Intelligence - Client-Ready Prototype
 
 Atlas is a clickable multi-asset portfolio management system prototype for demonstrating a unified public + private markets workflow.
 
@@ -18,7 +18,7 @@ Atlas is a clickable multi-asset portfolio management system prototype for demon
 
 ## Important demo boundary
 
-All portfolio, price, FX, benchmark, data-connection and reconciliation information in this prototype is fictional or simulated. It is designed to demonstrate workflows and requirements—not to book real trades or provide investment advice.
+All portfolio, price, FX, benchmark, data-connection and reconciliation information in this prototype is fictional or simulated. It is designed to demonstrate workflows and requirements-not to book real trades or provide investment advice.
 
 A production implementation would add secure authentication and RBAC, database persistence, custodian/administrator and market-data integrations, configurable reconciliation, audit logs, approval workflows, production performance/accounting calculations, encryption/secrets management, monitoring, backups and security/compliance controls.
 

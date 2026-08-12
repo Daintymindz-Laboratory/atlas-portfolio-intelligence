@@ -11,7 +11,7 @@
 - Multi-currency reporting.
 - Private-market metrics and portfolio-company look-through.
 - Compliance rules evaluated against the book.
-- Reconciliation as a first-class operational workflow—not an afterthought.
+- Reconciliation as a first-class operational workflow-not an afterthought.
 - Board/client reporting.
 - Clear separation between the presentation layer and production data connectors.
 
