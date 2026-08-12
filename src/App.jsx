@@ -5,7 +5,7 @@ import {
 } from "recharts";
 import {
   LayoutDashboard, Wallet, Building2, TrendingUp, Receipt, ShieldCheck,
-  Search, Plus, ArrowUpRight, ArrowDownRight, X, ChevronDown, Database, FileText, RefreshCw, CheckCircle2, AlertTriangle, Download, Clock3, Link2, UserRound,
+  Search, Plus, ArrowUpRight, ArrowDownRight, X, ChevronDown, Database, FileText, RefreshCw, CheckCircle2, AlertTriangle, Download, Clock3, Link2, UserRound, Bot, Bell, Gauge, FlaskConical, CalendarRange, Presentation, Users, Sparkles, Send, SlidersHorizontal,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -109,10 +109,15 @@ const NAV = [
   { id: "holdings", label: "Holdings", icon: Wallet },
   { id: "private", label: "Private markets", icon: Building2 },
   { id: "performance", label: "Performance", icon: TrendingUp },
+  { id: "risk", label: "Risk center", icon: Gauge },
+  { id: "scenario", label: "Scenario lab", icon: FlaskConical },
+  { id: "forecast", label: "Cash flow forecast", icon: CalendarRange },
   { id: "transactions", label: "Transactions", icon: Receipt },
   { id: "compliance", label: "Compliance", icon: ShieldCheck },
   { id: "data", label: "Data & reconciliation", icon: Database },
   { id: "reports", label: "Reports", icon: FileText },
+  { id: "committee", label: "IC workspace", icon: Presentation },
+  { id: "portal", label: "Client portal", icon: Users },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -183,6 +188,8 @@ export default function App() {
     } catch { return SEED_TX; }
   });
   const [showAdd, setShowAdd] = useState(false);
+  const [showAI, setShowAI] = useState(false);
+  const [showAlerts, setShowAlerts] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("atlas-demo-transactions", JSON.stringify(tx));
@@ -327,6 +334,15 @@ export default function App() {
                 </button>
               ))}
             </div>
+            <div className="relative hidden md:block">
+              <button onClick={() => setShowAlerts(!showAlerts)} className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50" title="Smart alerts">
+                <Bell size={16} /><span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500" />
+              </button>
+              {showAlerts && <AlertsPopover />}
+            </div>
+            <button onClick={() => setShowAI(true)} className="hidden items-center gap-1.5 rounded-lg bg-teal-700 px-3 py-2 text-sm font-medium text-white hover:bg-teal-800 md:flex">
+              <Sparkles size={15} /> Ask Atlas
+            </button>
           </div>
         </header>
 
@@ -337,10 +353,15 @@ export default function App() {
           )}
           {tab === "private" && <Private base={base} m={m} />}
           {tab === "performance" && <Performance m={m} base={base} />}
+          {tab === "risk" && <RiskCenter m={m} base={base} />}
+          {tab === "scenario" && <ScenarioLab m={m} base={base} />}
+          {tab === "forecast" && <CashFlowForecast m={m} base={base} />}
           {tab === "transactions" && <Transactions base={base} rows={visibleTx} onAdd={() => setShowAdd(true)} />}
           {tab === "compliance" && <Compliance m={m} base={base} />}
           {tab === "data" && <DataReconciliation base={base} />}
           {tab === "reports" && <Reports m={m} base={base} />}
+          {tab === "committee" && <CommitteeWorkspace m={m} base={base} />}
+          {tab === "portal" && <ClientPortal m={m} base={base} />}
         </main>
       </div>
 
@@ -351,6 +372,7 @@ export default function App() {
           onSave={(t) => { setTx((prev) => [{ ...t, id: `t${Date.now()}` }, ...prev]); setShowAdd(false); }}
         />
       )}
+      {showAI && <AtlasAI m={m} base={base} onClose={() => setShowAI(false)} />}
     </div>
   );
 }
@@ -509,7 +531,7 @@ function Holdings({ base, clsFilter, setClsFilter, rows, showPublic, showPrivate
                       <Td right mono>{h.cls === "Cash" ? "\u2014" : nf0.format(h.price)}</Td>
                       <Td right mono className="font-medium">{money(value, base)}</Td>
                       <Td right mono className="text-slate-500">{money(cost, base)}</Td>
-                      <Td right>{h.cls === "Cash" ? <span className="text-slate-400">—</span> : <PL value={pl} base={base} />}</Td>
+                      <Td right>{h.cls === "Cash" ? <span className="text-slate-400">-</span> : <PL value={pl} base={base} />}</Td>
                       <Td right mono className="text-slate-600">{((value / pubTotal) * 100).toFixed(1)}%</Td>
                     </tr>
                   );
@@ -832,7 +854,7 @@ function Reports({ m, base }) {
   return (
     <div className="space-y-5">
       <div className="flex flex-col justify-between gap-3 rounded-2xl bg-slate-900 p-6 text-white sm:flex-row sm:items-center">
-        <div><div className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">Board-ready reporting</div><h2 className="mt-1 text-xl font-semibold">Northstar Capital — July 2026</h2><p className="mt-1 text-sm text-slate-400">Consolidated public and private markets reporting prototype.</p></div>
+        <div><div className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">Board-ready reporting</div><h2 className="mt-1 text-xl font-semibold">Northstar Capital - July 2026</h2><p className="mt-1 text-sm text-slate-400">Consolidated public and private markets reporting prototype.</p></div>
         <div className="flex gap-2 no-print"><button onClick={()=>window.print()} className="rounded-lg bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-100">Print / Save PDF</button><button onClick={exportCsv} className="flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800"><Download size={15}/> Export CSV</button></div>
       </div>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4"><Stat label="Total assets" value={moneyC(m.aum,base)}/><Stat label="Public markets" value={moneyC(m.pubTotal,base)}/><Stat label="Private NAV" value={moneyC(m.privNav,base)}/><Stat label="Uncalled" value={moneyC(m.unfunded,base)}/></div>
@@ -846,11 +868,81 @@ function Reports({ m, base }) {
           ["Market data refresh completed","System","4 minutes ago"],
           ["Reconciliation break REC-1042 assigned","Portfolio Operations","18 minutes ago"],
           ["July committee pack generated","Investment Team","2 hours ago"],
-          ["Private fund NAV updated — Redwood Ventures IV","Portfolio Operations","1 day ago"],
+          ["Private fund NAV updated - Redwood Ventures IV","Portfolio Operations","1 day ago"],
         ].map(([a,u,t])=><div key={a} className="flex items-center justify-between rounded-lg border border-slate-100 p-3"><div className="flex items-center gap-2.5"><Clock3 size={15} className="text-slate-400"/><div><div className="text-sm text-slate-800">{a}</div><div className="text-xs text-slate-400">{u}</div></div></div><div className="text-xs text-slate-400">{t}</div></div>)}</div>
       </Card>
     </div>
   );
+}
+
+
+function AlertsPopover() {
+  const alerts = [
+    ["Capital call due", "Halstead Private Credit: $500K due 22 Aug", "High"],
+    ["Reconciliation exception", "Cash balance break REC-1042 remains open", "Medium"],
+    ["Concentration watch", "Largest issuer is approaching internal watch level", "Watch"],
+    ["NAV movement", "Redwood Ventures IV NAV increased 8.3%", "Info"],
+  ];
+  return <div className="absolute right-0 top-11 z-40 w-80 rounded-xl border border-slate-200 bg-white p-3 shadow-xl">
+    <div className="mb-2 text-sm font-semibold text-slate-900">Smart alerts</div>
+    <div className="space-y-2">{alerts.map(([t,d,l])=><div key={t} className="rounded-lg border border-slate-100 p-3"><div className="flex items-center justify-between"><span className="text-sm font-medium text-slate-800">{t}</span><span className="text-[10px] font-semibold uppercase text-amber-600">{l}</span></div><div className="mt-1 text-xs text-slate-500">{d}</div></div>)}</div>
+  </div>;
+}
+
+function RiskCenter({ m, base }) {
+  const risks=[
+    {name:"Equity concentration", value:62, label:"Moderate", note:"Technology exposure is the largest public risk contributor"},
+    {name:"Private liquidity", value:71, label:"Elevated", note:`${moneyC(m.unfunded,base)} of visible uncalled commitments`},
+    {name:"Currency exposure", value:28, label:"Low", note:"Non-USD exposure remains within policy tolerance"},
+    {name:"Rate sensitivity", value:43, label:"Moderate", note:"Fixed income duration creates measured rate sensitivity"},
+  ];
+  return <div className="space-y-5">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4"><Stat label="Portfolio volatility" value="9.2%"/><Stat label="Sharpe ratio" value="1.64"/><Stat label="Max drawdown" value="-7.8%"/><Stat label="95% VaR (1 day)" value={moneyC(m.aum*0.011,base)}/></div>
+    <div className="grid gap-5 lg:grid-cols-2"><Card title="Risk radar" subtitle="Illustrative risk scores from 0 to 100"><div className="space-y-4">{risks.map(r=><div key={r.name}><div className="flex justify-between text-sm"><span className="font-medium text-slate-800">{r.name}</span><span className="font-mono text-slate-600">{r.value}/100 · {r.label}</span></div><div className="mt-2 h-2 rounded-full bg-slate-100"><div className="h-2 rounded-full bg-teal-600" style={{width:`${r.value}%`}}/></div><div className="mt-1 text-xs text-slate-500">{r.note}</div></div>)}</div></Card>
+    <Card title="Top risk contributors" subtitle="Estimated contribution to total portfolio risk"><div className="space-y-3">{[["US Technology",31],["Private Equity",24],["Interest rates",14],["Private liquidity",13],["FX",8]].map(([n,v])=><div key={n} className="flex items-center gap-3"><div className="w-28 text-sm text-slate-600">{n}</div><div className="h-2 flex-1 rounded-full bg-slate-100"><div className="h-2 rounded-full bg-sky-600" style={{width:`${v*2.5}%`}}/></div><div className="w-10 text-right font-mono text-sm">{v}%</div></div>)}</div></Card></div>
+    <div className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900"><b>Atlas intelligence:</b> Current risk is primarily driven by public technology exposure and private-market liquidity. No modeled risk measure currently indicates a policy breach.</div>
+  </div>;
+}
+
+function ScenarioLab({ m, base }) {
+  const [eq,setEq]=useState(-20), [rates,setRates]=useState(100), [fx,setFx]=useState(-10), [priv,setPriv]=useState(-15);
+  const impact=m.pubTotal*(eq/100)*0.72 + m.pubTotal*(-rates/10000)*1.8 + m.pubTotal*(fx/100)*0.12 + m.privNav*(priv/100);
+  const stressed=m.aum+impact;
+  return <div className="space-y-5">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4"><Stat label="Current AUM" value={moneyC(m.aum,base)}/><Stat label="Stressed AUM" value={moneyC(stressed,base)}/><Stat label="Estimated impact" value={moneyC(impact,base)}/><Stat label="Portfolio impact" value={pct(m.aum?impact/m.aum*100:0)}/></div>
+    <div className="grid gap-5 lg:grid-cols-2"><Card title="Scenario assumptions" subtitle="Change the shocks to recalculate the portfolio"><div className="space-y-5">{[["Global equities",eq,setEq,-50,20,"%"],["Rates",rates,setRates,-100,300," bps"],["USD move",fx,setFx,-25,25,"%"],["Private valuations",priv,setPriv,-40,20,"%"]].map(([n,v,set,min,max,u])=><label key={n} className="block"><div className="flex justify-between text-sm"><span>{n}</span><span className="font-mono">{v}{u}</span></div><input className="mt-2 w-full accent-teal-700" type="range" min={min} max={max} value={v} onChange={e=>set(Number(e.target.value))}/></label>)}</div></Card>
+    <Card title="Stress result" subtitle="Illustrative first-order sensitivity model"><div className="space-y-4"><div className="rounded-xl bg-slate-900 p-5 text-white"><div className="text-xs uppercase tracking-wide text-slate-400">Estimated loss / gain</div><div className="mt-1 font-mono text-3xl font-semibold">{money(impact,base)}</div><div className="mt-1 text-sm text-slate-400">Result updates as assumptions change.</div></div>{[["Public equity shock",m.pubTotal*(eq/100)*0.72],["Rates",m.pubTotal*(-rates/10000)*1.8],["FX",m.pubTotal*(fx/100)*0.12],["Private marks",m.privNav*(priv/100)]].map(([n,v])=><div key={n} className="flex justify-between border-b border-slate-100 pb-2 text-sm"><span>{n}</span><PL value={v} base={base}/></div>)}</div></Card></div>
+    <WhatIfBuilder m={m} base={base}/>
+  </div>;
+}
+
+function WhatIfBuilder({m,base}) {
+ const [sell,setSell]=useState(1),[bonds,setBonds]=useState(.5),[commit,setCommit]=useState(2);
+ const cashChange=sell-bonds-commit; const privateAfter=m.privNav+commit*1e6; const aum=m.aum;
+ return <Card title="What-if portfolio builder" subtitle="Test proposed trades and commitments before implementation"><div className="grid gap-4 md:grid-cols-3">{[["Sell public equity ($M)",sell,setSell],["Buy bonds ($M)",bonds,setBonds],["New PE commitment ($M)",commit,setCommit]].map(([n,v,set])=><label key={n} className="text-sm">{n}<input type="number" min="0" step="0.25" value={v} onChange={e=>set(Number(e.target.value))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"/></label>)}</div><div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4"><Stat label="Net cash change" value={moneyC(cashChange*1e6,base)}/><Stat label="Private allocation" value={pct(aum?privateAfter/aum*100:0)}/><Stat label="Pro forma bonds" value={moneyC(bonds*1e6,base)}/><Stat label="Policy result" value="Within limits"/></div></Card>
+}
+
+function CashFlowForecast({m,base}) {
+ const rows=[
+  {q:"Q3 2026",calls:1.1,dist:.6,nav:31.2},{q:"Q4 2026",calls:1.8,dist:1.0,nav:31.9},{q:"Q1 2027",calls:1.4,dist:1.3,nav:32.4},{q:"Q2 2027",calls:.9,dist:1.7,nav:32.8},{q:"Q3 2027",calls:.7,dist:2.1,nav:32.5},{q:"Q4 2027",calls:.5,dist:2.4,nav:31.8},
+ ];
+ return <div className="space-y-5"><div className="grid grid-cols-2 gap-4 lg:grid-cols-4"><Stat label="12m expected calls" value={moneyC(5.2e6,base)}/><Stat label="12m distributions" value={moneyC(4.6e6,base)}/><Stat label="Peak funding quarter" value="Q4 2026"/><Stat label="Liquidity coverage" value="3.4x"/></div><Card title="Private markets cash flow forecast" subtitle="Illustrative pacing model for capital calls, distributions and NAV"><ResponsiveContainer width="100%" height={300}><BarChart data={rows}><CartesianGrid strokeDasharray="3 3" vertical={false}/><XAxis dataKey="q"/><YAxis/><Tooltip formatter={(v)=>`${v.toFixed(1)}M`}/><Legend/><Bar dataKey="calls" name="Capital calls ($M)" fill="#e11d48" radius={[4,4,0,0]}/><Bar dataKey="dist" name="Distributions ($M)" fill="#0f766e" radius={[4,4,0,0]}/></BarChart></ResponsiveContainer></Card><Card title="Liquidity planning" subtitle="Projected net private-market cash flow"><div className="overflow-x-auto"><table className="w-full"><thead><tr><Th>Quarter</Th><Th right>Calls</Th><Th right>Distributions</Th><Th right>Net flow</Th><Th right>Projected NAV</Th></tr></thead><tbody>{rows.map(r=><tr key={r.q} className="border-t border-slate-50"><Td>{r.q}</Td><Td right mono>{money(r.calls*1e6,base)}</Td><Td right mono>{money(r.dist*1e6,base)}</Td><Td right><PL value={(r.dist-r.calls)*1e6} base={base}/></Td><Td right mono>{money(r.nav*1e6,base)}</Td></tr>)}</tbody></table></div></Card></div>
+}
+
+function CommitteeWorkspace({m,base}) {
+ const agenda=["Executive portfolio summary","Performance and attribution","Risk and scenario review","Private markets pacing","Compliance and exceptions","Decisions and actions"];
+ return <div className="space-y-5"><div className="rounded-2xl bg-slate-900 p-6 text-white"><div className="text-xs font-medium uppercase tracking-[.16em] text-slate-400">Investment Committee Workspace</div><h2 className="mt-1 text-xl font-semibold">August 2026 Committee Meeting</h2><p className="mt-1 text-sm text-slate-400">A single workspace for the agenda, AI briefing, decisions and board pack.</p></div><div className="grid gap-5 lg:grid-cols-2"><Card title="AI-generated committee brief" subtitle="Drafted from the current demo portfolio"><div className="space-y-3 text-sm text-slate-700"><p><b>Performance:</b> The portfolio remains ahead of its policy benchmark, led by public equities and private equity.</p><p><b>Risk:</b> Technology concentration and private liquidity are the primary watch items. Modeled policy checks remain within limits.</p><p><b>Liquidity:</b> Near-term capital calls are manageable against available cash, with the largest modeled funding quarter in Q4 2026.</p><p><b>Operations:</b> Three reconciliation exceptions remain open and should be reviewed before final reporting.</p></div></Card><Card title="Meeting agenda" subtitle="Board-ready workflow"><div className="space-y-2">{agenda.map((a,i)=><div key={a} className="flex items-center gap-3 rounded-lg border border-slate-100 p-3"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold">{i+1}</span><span className="text-sm">{a}</span></div>)}</div></Card></div><Card title="Decision log" subtitle="Illustrative approvals and follow-up actions"><div className="grid gap-3 md:grid-cols-3">{[["Approve Q3 pacing plan","Pending vote"],["Review REC-1042 cash break","Assigned"],["Reduce technology concentration","For discussion"]].map(([a,s])=><div key={a} className="rounded-xl border border-slate-200 p-4"><div className="text-sm font-medium">{a}</div><div className="mt-2 text-xs font-medium text-teal-700">{s}</div></div>)}</div></Card></div>
+}
+
+function ClientPortal({m,base}) {
+ return <div className="space-y-5"><div className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-6 sm:flex-row sm:items-center"><div><div className="text-xs font-medium uppercase tracking-[.16em] text-slate-400">Investor view</div><h2 className="mt-1 text-xl font-semibold">Northstar Capital Client Portal</h2><p className="mt-1 text-sm text-slate-500">A simplified, permission-aware experience for clients and stakeholders.</p></div><div className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2"><UserRound size={17}/><div><div className="text-sm font-medium">Client Viewer</div><div className="text-xs text-slate-400">Read-only access</div></div></div></div><div className="grid grid-cols-2 gap-4 lg:grid-cols-4"><Stat label="Portfolio value" value={moneyC(m.aum,base)}/><Stat label="12m return" value="+18.5%"/><Stat label="Private NAV" value={moneyC(m.privNav,base)}/><Stat label="Documents" value="12"/></div><div className="grid gap-5 lg:grid-cols-2"><Card title="Your portfolio" subtitle="High-level allocation and performance"><div className="space-y-3">{m.allocRows.slice(0,5).map(r=><div key={r.name}><div className="flex justify-between text-sm"><span>{r.name}</span><span className="font-mono">{r.wt.toFixed(1)}%</span></div><div className="mt-1 h-2 rounded-full bg-slate-100"><div className="h-2 rounded-full bg-teal-600" style={{width:`${r.wt}%`}}/></div></div>)}</div></Card><Card title="Documents & statements" subtitle="Secure investor reporting library"><div className="space-y-2">{[["July 2026 Portfolio Statement","PDF"],["Q2 Private Markets Report","PDF"],["2026 Investment Policy","PDF"],["Capital Call Notice: Halstead","PDF"]].map(([n,f])=><div key={n} className="flex items-center justify-between rounded-lg border border-slate-100 p-3"><div className="flex items-center gap-2"><FileText size={16} className="text-slate-400"/><span className="text-sm">{n}</span></div><span className="text-xs text-slate-400">{f}</span></div>)}</div></Card></div></div>
+}
+
+function AtlasAI({m,base,onClose}) {
+ const [q,setQ]=useState(""); const [messages,setMessages]=useState([{role:"ai",text:"Ask me about portfolio risk, performance, private markets, liquidity, compliance, or committee reporting."}]);
+ const answer=(text)=>{const t=text.toLowerCase(); if(t.includes("risk"))return `The main modeled risks are technology concentration and private liquidity. 95% one-day VaR is approximately ${moneyC(m.aum*0.011,base)}.`; if(t.includes("private")||t.includes("fund"))return `Visible private NAV is ${moneyC(m.privNav,base)} with ${moneyC(m.unfunded,base)} of uncalled commitments. Redwood Ventures IV has the highest modeled IRR at 21.4%.`; if(t.includes("compliance"))return "All five current mandate checks are within modeled limits. The operations layer still shows three reconciliation exceptions for review."; if(t.includes("performance")||t.includes("return"))return "The demo portfolio returned 18.5% over the trailing 12 months versus 11.6% for the policy benchmark, an outperformance of 6.9 percentage points."; if(t.includes("committee")||t.includes("summary"))return "Committee summary: performance is ahead of benchmark, liquidity is adequate for modeled calls, technology concentration is the main public-market watch item, and three reconciliation exceptions remain open."; return `Current visible AUM is ${moneyC(m.aum,base)}. Try asking about risk, performance, liquidity, private funds, compliance, or the investment committee brief.`};
+ const send=()=>{if(!q.trim())return; const text=q.trim(); setMessages(x=>[...x,{role:"user",text},{role:"ai",text:answer(text)}]);setQ("")};
+ return <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/20"><div className="flex h-full w-full max-w-md flex-col bg-white shadow-2xl"><div className="flex items-center justify-between border-b border-slate-200 p-4"><div className="flex items-center gap-2"><div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-700 text-white"><Bot size={18}/></div><div><div className="text-sm font-semibold">Atlas AI Copilot</div><div className="text-xs text-slate-500">Grounded in demo portfolio data</div></div></div><button onClick={onClose} className="rounded-lg p-2 hover:bg-slate-100"><X size={18}/></button></div><div className="flex-1 space-y-3 overflow-y-auto p-4">{messages.map((x,i)=><div key={i} className={`max-w-[88%] rounded-xl p-3 text-sm ${x.role==='ai'?'bg-slate-100 text-slate-800':'ml-auto bg-teal-700 text-white'}`}>{x.text}</div>)}</div><div className="border-t border-slate-200 p-4"><div className="mb-2 flex flex-wrap gap-1.5">{["Biggest risks?","Summarize private markets","Any compliance issues?"].map(x=><button key={x} onClick={()=>setQ(x)} className="rounded-full border border-slate-200 px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-50">{x}</button>)}</div><div className="flex gap-2"><input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==='Enter'&&send()} placeholder="Ask Atlas..." className="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"/><button onClick={send} className="rounded-lg bg-teal-700 px-3 text-white"><Send size={16}/></button></div><div className="mt-2 text-[10px] text-slate-400">Prototype AI uses deterministic demo responses. Production would use permission-aware retrieval and approved model services.</div></div></div></div>
 }
 
 /* Add-transaction modal ------------------------------------------- */
