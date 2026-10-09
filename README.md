@@ -1,3 +1,50 @@
+# All On / Atlas Portfolio Management
+
+The main page at / contains the complete AllOn_Atlas (1).html application, preserved without changing its source features. The original Atlas public/private markets prototype remains available at /atlas.html. Both entries are included in the Vite production build.
+
+## All On modules
+
+- Dashboard: NAV, cost, gains, portfolio allocation, performance and exceptions
+- Portfolio companies: profiles, documents, monitoring and risk amendments
+- Deal pipeline: stages, prospective investments and ticket summaries
+- Investments: debt, equity, convertible debt, mezzanine and working capital
+- Financial administration: invoices, payment recording, interest action and SAP journal export
+- Valuation: investment NAV and valuation export
+- ESG and impact: energy, emissions, connections, jobs, gender and Excel export
+- Reports: portfolio, finance, valuation and reporting exports
+- AI and automation: portfolio assistant, commentary, simulated import and MCP toggles
+- Approvals: two-stage investment/finance approval and rejection
+- Administration: user listing and permission matrix
+- Audit trail and notifications
+
+Six role profiles and NGN/USD display are preserved.
+
+## Source behavior and limits
+
+This is the supplied browser prototype. Role selection is a demo login; permissions are UI controls rather than server-side authorization. Changes are held in memory and reset when the page reloads. AI responses use local rules, MCP connections are simulated toggles, import inserts predefined sample records, and scheduled jobs are display-only. User management and adding pipeline deals show demo messages. Interest recalculation logs a demo action. Excel exports are HTML .xls files, as in the supplied source. No backend or external service integrations were present in the HTML.
+
+## Development and verification
+
+Use Node.js 20.19+ or 22.12+.
+
+```sh
+npm ci
+npm test
+npm run dev
+npm run build
+npm run preview
+```
+
+Tests cover all permitted role views in both currencies, two-stage approvals, invoice issuance/payment/generation, sample import, assistant responses, commentary, exports and audit updates.
+
+## Deployment
+
+The repository is connected to Vercel at https://atlas-portfolio-intelligence.vercel.app. Production builds use npm run build and publish dist. Pushing main triggers the configured Vercel Git integration.
+
+---
+
+## Original Atlas documentation
+
 # Atlas Portfolio Intelligence - Client-Ready Prototype
 
 Atlas is a clickable multi-asset portfolio management system prototype for demonstrating a unified public + private markets workflow.

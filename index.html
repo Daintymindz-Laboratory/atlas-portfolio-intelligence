@@ -1,2 +1,711 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><meta name="description" content="Atlas Portfolio Intelligence - client-ready multi-asset portfolio management prototype."/><title>Atlas Portfolio Intelligence</title></head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>All On Portfolio Management</title>
+<style>
+  :root{
+    --navy:#231f20; --navy2:#332d2e; --navy3:#48393a;
+    --accent:#f26522; --accent-d:#d4531a;
+    --amber:#d97706; --red:#dc2626; --sky:#2563eb; --violet:#7c3aed;
+    --ink:#231f20; --slate:#5b5457; --mut:#9a9498; --line:#eae5e2;
+    --bg:#faf7f4; --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5}
+  button{font-family:inherit;cursor:pointer}
+  .mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+  /* ---------- login ---------- */
+  .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+    background:radial-gradient(1100px 600px at 18% -10%,#4a3a3b 0%,#231f20 52%,#171314 100%)}
+  .login-card{background:var(--card);border-radius:18px;max-width:760px;width:100%;padding:32px;box-shadow:0 30px 80px rgba(2,12,30,.45)}
+  .brand-row{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#f26522,#d4531a);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px}
+  .login-card h1{font-size:20px;margin:0}
+  .login-card .sub{color:var(--slate);font-size:13px;margin:2px 0 0}
+  .demo-note{margin:14px 0 18px;font-size:12px;color:var(--slate);background:#f1f5f9;border:1px solid var(--line);padding:9px 12px;border-radius:9px}
+  .role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:640px){.role-grid{grid-template-columns:1fr}}
+  .role-card{text-align:left;border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;transition:.15s;display:flex;flex-direction:column;gap:6px}
+  .role-card:hover{border-color:var(--accent);box-shadow:0 6px 18px rgba(14,159,110,.14);transform:translateY(-1px)}
+  .role-card .rn{font-weight:700;font-size:13.5px}
+  .role-card .rd{font-size:11.5px;color:var(--slate);min-height:32px}
+  .role-card .re{font-size:11px;color:var(--accent-d);font-weight:600}
+  /* ---------- app shell ---------- */
+  .shell{display:flex;min-height:100vh}
+  .side{width:230px;background:var(--navy);color:#cdd8e8;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .side .head{height:60px;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .side .head .t{font-weight:700;color:#fff;font-size:15px;line-height:1.1}
+  .side .head .s{font-size:10.5px;color:#8ea4c4}
+  nav.menu{flex:1;padding:10px;overflow-y:auto}
+  .navitem{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:none;border:0;color:#b7c6dd;padding:9px 11px;border-radius:9px;font-size:13.5px;margin-bottom:2px}
+  .navitem:hover{background:rgba(255,255,255,.07);color:#fff}
+  .navitem.active{background:var(--navy3);color:#fff;font-weight:600}
+  .navitem .ic{width:18px;text-align:center;font-size:15px}
+  .navitem .badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10.5px;font-weight:700;border-radius:10px;padding:1px 7px}
+  .side .foot{padding:12px 14px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:#8ea4c4}
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .top{height:60px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 20px;position:sticky;top:0;z-index:20}
+  .top h2{font-size:16px;margin:0;font-weight:700}
+  .top .crumb{font-size:11.5px;color:var(--mut)}
+  .spacer{flex:1}
+  .seg{display:flex;background:#f1f5f9;border:1px solid var(--line);border-radius:9px;padding:2px}
+  .seg button{border:0;background:none;padding:5px 10px;border-radius:7px;font-size:12px;color:var(--slate);font-weight:600}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .iconbtn{position:relative;border:1px solid var(--line);background:#fff;border-radius:9px;width:36px;height:34px;font-size:16px;display:flex;align-items:center;justify-content:center}
+  .iconbtn .dot{position:absolute;top:-5px;right:-5px;background:var(--red);color:#fff;font-size:10px;font-weight:700;border-radius:10px;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px}
+  .userchip{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:10px;padding:4px 8px 4px 4px}
+  .avatar{width:28px;height:28px;border-radius:8px;background:var(--navy2);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+  .userchip .un{font-size:12.5px;font-weight:600;line-height:1.05}
+  .userchip .ur{font-size:10.5px;color:var(--slate)}
+  .content{padding:20px;max-width:1200px;width:100%}
+  /* ---------- generic ---------- */
+  .grid{display:grid;gap:16px}
+  .g4{grid-template-columns:repeat(4,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g3,.g2{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:13px}
+  .card .ch{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #eef2f6}
+  .card .ch h3{margin:0;font-size:13.5px} .card .ch .cs{font-size:11.5px;color:var(--mut)}
+  .card .cb{padding:16px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px}
+  .stat .l{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--slate);font-weight:600}
+  .stat .v{font-size:22px;font-weight:700;margin-top:3px} .stat .d{font-size:11.5px;margin-top:3px;font-weight:600}
+  .up{color:#0b7d57} .down{color:var(--red)}
+  table{width:100%;border-collapse:collapse}
+  th{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--slate);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:600;white-space:nowrap}
+  td{padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:13px;vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#fafcfe}
+  th.r,td.r{text-align:right}
+  .tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;border-radius:20px;padding:2px 9px}
+  .t-green{background:#e7f6ef;color:#0b7d57}.t-amber{background:#fef3e2;color:#b45309}.t-red{background:#fdecec;color:#b91c1c}
+  .t-sky{background:#e6f2fb;color:#0369a1}.t-violet{background:#f1ebfd;color:#6d28d9}.t-slate{background:#eef2f6;color:#475569}
+  .dotc{width:8px;height:8px;border-radius:2px;display:inline-block}
+  .btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:600;color:var(--ink)}
+  .btn:hover{background:#f8fafc}
+  .btn.p{background:var(--accent);border-color:var(--accent);color:#fff}.btn.p:hover{background:var(--accent-d)}
+  .btn.d{color:var(--red);border-color:#f5c9c9}.btn.d:hover{background:#fdf2f2}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.sm{padding:4px 9px;font-size:11.5px}
+  .muted{color:var(--slate)} .small{font-size:12px}
+  .row{display:flex;align-items:center;gap:10px}.wrap{flex-wrap:wrap}
+  .barwrap{height:8px;background:#eef2f6;border-radius:6px;overflow:hidden}
+  .barwrap>span{display:block;height:100%;border-radius:6px}
+  .kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed #eef2f6;font-size:13px}
+  .kv:last-child{border-bottom:0}.kv .k{color:var(--slate)}
+  /* drawer + modal */
+  .scrim{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:60;display:flex;justify-content:flex-end}
+  .drawer{width:520px;max-width:94vw;background:#fff;height:100%;overflow-y:auto;box-shadow:-20px 0 60px rgba(0,0,0,.2)}
+  .modal-scrim{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:70;display:flex;align-items:center;justify-content:center;padding:16px}
+  .modal{background:#fff;border-radius:16px;max-width:460px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+  .dh{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff}
+  .dh h3{margin:0;font-size:15px}
+  .x{border:0;background:#f1f5f9;border-radius:8px;width:30px;height:30px;font-size:16px;color:var(--slate)}
+  .field{margin-bottom:13px}.field label{display:block;font-size:12px;font-weight:600;color:var(--slate);margin-bottom:5px}
+  .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:13px;font-family:inherit}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,159,110,.15)}
+  /* toast */
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center}
+  .toast{background:#0f172a;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:tin .2s}
+  @keyframes tin{from{opacity:0;transform:translateY(8px)}}
+  /* notif panel */
+  .npanel{position:absolute;top:52px;right:120px;width:340px;background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:0 20px 50px rgba(0,0,0,.18);z-index:50;overflow:hidden}
+  .nitem{display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:12.5px}
+  .nitem:last-child{border-bottom:0}.nitem .ni{font-size:15px}
+  .nitem.unread{background:#f3faf7}
+  .perm{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:0;font-size:12px}
+  .perm div{padding:8px 10px;border-bottom:1px solid #f1f5f9}
+  .perm .hd{font-weight:600;color:var(--slate);background:#f8fafc}
+  .yes{color:var(--accent-d);font-weight:700}.no{color:var(--mut)}
+  .empty{text-align:center;color:var(--mut);padding:30px;font-size:13px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<script>
+/* ============================ DATA ============================ */
+const FX={NGN:1, USD:1/1600, EUR:1/1750}; // canonical stored in NGN
+const SYM={NGN:'₦', USD:'$', EUR:'€'};
+const SECCLR={'Straight Debt':'#2563eb','Convertible Debt':'#7c3aed','Working Capital':'#0891b2','Mezzanine':'#0e9f6e','Equity':'#e11d48'};
+
+const ROLES={
+  admin:{name:'System Administrator',desc:'System configuration and user administration',modules:['dashboard','companies','pipeline','investments','finance','valuation','esg','reports','ai','approvals','admin','audit']},
+  pm:{name:'Portfolio Management Team',desc:'Portfolio company management, monitoring and governance',modules:['dashboard','companies','pipeline','investments','valuation','esg','reports','ai','approvals','audit']},
+  finance:{name:'Finance Team',desc:'Investment setup, invoicing, payments and financial reporting',modules:['dashboard','companies','investments','finance','valuation','esg','reports','ai','approvals','audit']},
+  im:{name:'Investment Manager',desc:'Review and approval of investment-related changes',modules:['dashboard','companies','pipeline','investments','valuation','esg','reports','ai','approvals','audit']},
+  fm:{name:'Finance Manager',desc:'Review and approval of finance-related changes',modules:['dashboard','finance','investments','reports','ai','approvals','audit']},
+  viewer:{name:'Read-only User',desc:'Reporting and enquiry access only',modules:['dashboard','companies','investments','valuation','esg','reports','ai','audit']},
+};
+
+const companies=[
+  {id:'c1',name:'Delta Solar Manufacturing',ref:'ALLON-PC-001',sector:'Solar Manufacturing',loc:'Port Harcourt, Rivers',status:'Active',risk:'Low',pm:'A. Okafor',
+   docs:[{n:'Annual Financial Statements 2025',s:'Submitted'},{n:'Q2 Management Accounts',s:'Submitted'},{n:'Board Meeting Minutes (Jun)',s:'Outstanding'},{n:'ESG Report 2025',s:'Submitted'}]},
+  {id:'c2',name:'Riverline Mini-Grids',ref:'ALLON-PC-002',sector:'Mini-grids',loc:'Yenagoa, Bayelsa',status:'Active',risk:'Medium',pm:'I. Bello',
+   docs:[{n:'Annual Financial Statements 2025',s:'Submitted'},{n:'Q2 Management Accounts',s:'Overdue'},{n:'Board Meeting Minutes (Jun)',s:'Submitted'},{n:'ESG Report 2025',s:'Outstanding'}]},
+  {id:'c3',name:'Creekside Solar Home Systems',ref:'ALLON-PC-003',sector:'Solar Home Systems',loc:'Warri, Delta',status:'Active',risk:'Medium',pm:'A. Okafor',
+   docs:[{n:'Annual Financial Statements 2025',s:'Submitted'},{n:'Q2 Management Accounts',s:'Submitted'},{n:'Compliance Report',s:'Outstanding'}]},
+  {id:'c4',name:'Green Delta Power',ref:'ALLON-PC-004',sector:'Mini-grids',loc:'Uyo, Akwa Ibom',status:'Active',risk:'Low',pm:'I. Bello',
+   docs:[{n:'Annual Financial Statements 2025',s:'Submitted'},{n:'Board Papers (H1)',s:'Submitted'},{n:'ESG Report 2025',s:'Submitted'}]},
+  {id:'c5',name:'Coastal C&I Solar',ref:'ALLON-PC-005',sector:'C&I Solar',loc:'Port Harcourt, Rivers',status:'Watchlist',risk:'High',pm:'A. Okafor',
+   docs:[{n:'Annual Financial Statements 2025',s:'Overdue'},{n:'Q2 Management Accounts',s:'Outstanding'},{n:'Strategy Document',s:'Outstanding'}]},
+  {id:'c6',name:'Mangrove Energy Finance',ref:'ALLON-PC-006',sector:'Solar Asset Finance',loc:'Calabar, Cross River',status:'Active',risk:'Low',pm:'I. Bello',
+   docs:[{n:'Annual Financial Statements 2025',s:'Submitted'},{n:'Management Accounts',s:'Submitted'}]},
+];
+
+// amounts canonical NGN
+let investments=[
+  {id:'i1',co:'c1',type:'Straight Debt',ccy:'NGN',amount:120000000,rate:12,tenor:36,disb:'2024-03-15',maturity:'2027-03-15',status:'Performing',nav:112000000},
+  {id:'i2',co:'c1',type:'Equity',ccy:'NGN',amount:80000000,own:8,disb:'2023-09-01',status:'Held',nav:104000000},
+  {id:'i3',co:'c2',type:'Convertible Debt',ccy:'USD',amount:400000000,rate:8,tenor:24,disb:'2024-06-10',maturity:'2026-06-10',status:'Performing',nav:410000000},
+  {id:'i4',co:'c2',type:'Mezzanine',ccy:'NGN',amount:45000000,rate:15,tenor:12,disb:'2025-01-20',maturity:'2026-01-20',status:'Performing',nav:47000000},
+  {id:'i5',co:'c3',type:'Straight Debt',ccy:'NGN',amount:60000000,rate:14,tenor:24,disb:'2024-02-01',maturity:'2026-02-01',status:'Watch',nav:56000000},
+  {id:'i6',co:'c4',type:'Equity',ccy:'NGN',amount:150000000,own:15,disb:'2022-11-15',status:'Held',nav:235000000},
+  {id:'i7',co:'c4',type:'Working Capital',ccy:'NGN',amount:30000000,rate:15,tenor:12,disb:'2025-03-01',maturity:'2026-03-01',status:'Performing',nav:30000000},
+  {id:'i8',co:'c5',type:'Straight Debt',ccy:'NGN',amount:90000000,rate:13,tenor:36,disb:'2023-07-01',maturity:'2026-07-01',status:'Arrears',nav:74000000},
+  {id:'i9',co:'c6',type:'Convertible Debt',ccy:'NGN',amount:75000000,rate:10,tenor:30,disb:'2024-10-05',maturity:'2027-04-05',status:'Performing',nav:79000000},
+];
+
+let invoices=[
+  {id:'v1',inv:'i1',co:'c1',no:'INV-2601',due:'2026-09-15',amount:3600000,status:'Paid'},
+  {id:'v2',inv:'i1',co:'c1',no:'INV-2609',due:'2026-10-15',amount:3600000,status:'Issued'},
+  {id:'v3',inv:'i3',co:'c2',no:'INV-2603',due:'2026-09-10',amount:8000000,status:'Partially Paid'},
+  {id:'v4',inv:'i5',co:'c3',no:'INV-2602',due:'2026-08-01',amount:2100000,status:'Overdue'},
+  {id:'v5',inv:'i8',co:'c5',no:'INV-2604',due:'2026-07-15',amount:2925000,status:'Overdue'},
+  {id:'v6',inv:'i9',co:'c6',no:'INV-2607',due:'2026-10-05',amount:1875000,status:'Draft'},
+];
+
+let approvals=[
+  {id:'a1',kind:'investment',title:'Risk rating change, Riverline Mini-Grids: Medium to High',by:'A. Okafor (PM)',apply:()=>{companies.find(c=>c.id==='c2').risk='High';},im:false,fm:false,ts:'2026-09-24'},
+  {id:'a2',kind:'finance',title:'Interest rate change, Creekside Solar Home Systems: 14% to 13.5%',by:'Finance Team',apply:()=>{investments.find(i=>i.id==='i5').rate=13.5;},im:false,fm:false,ts:'2026-09-25'},
+];
+let audit=[
+  {ts:'2026-09-25 14:20',user:'Finance Team',act:'Submitted interest-rate amendment for Creekside Solar Home Systems for approval'},
+  {ts:'2026-09-24 09:05',user:'A. Okafor (PM)',act:'Submitted risk-rating change for GVE for approval'},
+  {ts:'2026-09-22 16:40',user:'Finance Team',act:'Recorded payment against INV-2601 (Delta Solar Manufacturing)'},
+  {ts:'2026-09-20 11:12',user:'System Administrator',act:'Created user account for Read-only User'},
+];
+let notifications=[
+  {id:'n1',ic:'⏰',txt:'INV-2604 (Coastal C&I Solar) is overdue by 42 days',read:false},
+  {id:'n2',ic:'📄',txt:'GVE Q2 Management Accounts submission is overdue',read:false},
+  {id:'n3',ic:'✅',txt:'2 changes awaiting your approval',read:false},
+];
+
+/* ============================ STATE ============================ */
+const S={user:null, role:null, view:'dashboard', ccy:'NGN', drawer:null, modal:null, notifOpen:false, aiOpen:false, chat:[], mcp:{claude:false,chatgpt:false}, commentary:null};
+const co=id=>companies.find(c=>c.id===id);
+const coName=id=>{const c=co(id);return c?c.name:id};
+
+/* ============================ HELPERS ============================ */
+function money(ngn,digits){const v=ngn*FX[S.ccy];const s=SYM[S.ccy];
+  if(Math.abs(v)>=1e6&&digits!=='full'){return s+(v/1e6).toLocaleString('en-US',{maximumFractionDigits:1})+'M'}
+  return s+Math.round(v).toLocaleString('en-US')}
+function moneyFull(ngn){return SYM[S.ccy]+Math.round(ngn*FX[S.ccy]).toLocaleString('en-US')}
+const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
+function riskTag(r){const m={Low:'t-green',Medium:'t-amber',High:'t-red'};return `<span class="tag ${m[r]||'t-slate'}">${r}</span>`}
+function statusTag(s){const m={Performing:'t-green',Held:'t-sky',Watch:'t-amber',Arrears:'t-red',Active:'t-green',Watchlist:'t-amber',
+  Paid:'t-green',Issued:'t-sky','Partially Paid':'t-amber',Overdue:'t-red',Draft:'t-slate',Cancelled:'t-slate',
+  Submitted:'t-green',Outstanding:'t-amber'};return `<span class="tag ${m[s]||'t-slate'}">${s}</span>`}
+function secDot(t){return `<span class="dotc" style="background:${SECCLR[t]||'#64748b'}"></span>`}
+function can(action){
+  const r=S.role;
+  if(action==='editCompany')return r==='pm'||r==='admin';
+  if(action==='editFinance')return r==='finance'||r==='admin';
+  if(action==='approveInv')return r==='im'||r==='admin';
+  if(action==='approveFin')return r==='fm'||r==='admin';
+  if(action==='invoice')return r==='finance'||r==='admin';
+  if(action==='admin')return r==='admin';
+  return false;
+}
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.getElementById('toast').appendChild(t);setTimeout(()=>t.remove(),2600)}
+function logAudit(act){const d=new Date();const ts=d.toISOString().slice(0,16).replace('T',' ');audit.unshift({ts,user:ROLES[S.role].name,act})}
+function notify(txt,ic){notifications.unshift({id:'n'+Date.now(),ic:ic||'🔔',txt,read:false})}
+
+/* charts */
+function donut(segs,size){size=size||150;const r=size/2-14,cx=size/2,cy=size/2,C=2*Math.PI*r;let off=0;const tot=sum(segs,s=>s.value)||1;
+  let circles=segs.map(s=>{const frac=s.value/tot;const dash=frac*C;const el=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="16" stroke-dasharray="${dash} ${C-dash}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})"/>`;off+=dash;return el}).join('');
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${circles}<circle cx="${cx}" cy="${cy}" r="${r-14}" fill="#fff"/></svg>`}
+function linechart(vals,w,h){w=w||520;h=h||150;const pad=8;const mx=Math.max(...vals),mn=Math.min(...vals);const rng=(mx-mn)||1;
+  const pts=vals.map((v,i)=>{const x=pad+i*(w-2*pad)/(vals.length-1);const y=h-pad-((v-mn)/rng)*(h-2*pad);return [x,y]});
+  const poly=pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const area=`${pad},${h-pad} `+poly+` ${w-pad},${h-pad}`;
+  return `<svg width="100%" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polygon points="${area}" fill="rgba(242,101,34,.10)"/><polyline points="${poly}" fill="none" stroke="#f26522" stroke-width="2.5"/></svg>`}
+function hbars(items){const mx=Math.max(...items.map(i=>i.v))||1;
+  return items.map(i=>`<div style="margin-bottom:9px"><div class="row" style="justify-content:space-between;font-size:12px;margin-bottom:3px"><span class="muted">${i.l}</span><span class="mono" style="font-weight:600">${i.d||money(i.v)}</span></div><div class="barwrap"><span style="width:${Math.max(4,i.v/mx*100)}%;background:${i.c||'#f26522'}"></span></div></div>`).join('')}
+
+/* ============================ RENDER ROOT ============================ */
+function render(){document.getElementById('app').innerHTML = S.user? shell() : login(); S.notifOpen=S.notifOpen}
+
+/* ---------- login ---------- */
+function login(){
+  const cards=Object.entries(ROLES).map(([k,r])=>`
+    <button class="role-card" onclick="signIn('${k}')">
+      <span class="rn">${r.name}</span>
+      <span class="rd">${r.desc}</span>
+      <span class="re">Sign in →</span>
+    </button>`).join('');
+  return `<div class="login-wrap"><div class="login-card">
+    <div class="brand-row"><div class="logo">A</div><div><h1>All On</h1><div class="sub">Investment Portfolio Management System</div></div></div>
+    <div class="demo-note">Configured for All On Partnership for Energy Access. Select a role to sign in; each role sees only what its permissions allow.</div>
+    <div class="role-grid">${cards}</div>
+  </div></div>`;
+}
+function signIn(r){S.user={name:ROLES[r].name},S.role=r;const m=ROLES[r].modules;S.view=m[0];render()}
+function signOut(){S.user=null;S.role=null;S.notifOpen=false;render()}
+
+/* ---------- shell ---------- */
+function svg(inner){return `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`}
+const ICON={
+ dashboard:svg('<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>'),
+ companies:svg('<path d="M3 21V6l6-3v18"/><path d="M9 21V8l7 3v10"/><path d="M12 11v0M12 15v0"/>'),
+ pipeline:svg('<path d="M3 5h18l-7 8v6l-4-2v-4z"/>'),
+ investments:svg('<path d="M4 20V11"/><path d="M10 20V5"/><path d="M16 20v-6"/><path d="M2 20h20"/>'),
+ finance:svg('<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 8h6M9 12h6M9 16h4"/>'),
+ valuation:svg('<path d="M3 16l5-5 4 3 8-9"/><path d="M3 21h18"/>'),
+ esg:svg('<path d="M12 21c6-2 9-7 9-14-7 0-11 4-12 9"/><path d="M12 21c-4-1-6-4-6-9"/>'),
+ reports:svg('<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>'),
+ ai:svg('<rect x="6" y="7" width="12" height="11" rx="2"/><path d="M10 2v5M14 2v5M3 11h3M3 14h3M18 11h3M18 14h3"/>'),
+ approvals:svg('<path d="M20 6L9 17l-5-5"/>'),
+ admin:svg('<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.5 5.5l2 2M16.5 16.5l2 2M18.5 5.5l-2 2M7.5 16.5l-2 2"/>'),
+ audit:svg('<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>'),
+};
+const NAVMETA={dashboard:[ICON.dashboard,'Dashboard'],companies:[ICON.companies,'Portfolio Companies'],pipeline:[ICON.pipeline,'Deal Pipeline'],investments:[ICON.investments,'Investments'],finance:[ICON.finance,'Financial Admin'],valuation:[ICON.valuation,'Valuation'],esg:[ICON.esg,'ESG and Impact'],reports:[ICON.reports,'Reports'],ai:[ICON.ai,'AI and Automation'],approvals:[ICON.approvals,'Approvals'],admin:[ICON.admin,'Administration'],audit:[ICON.audit,'Audit Trail']};
+function shell(){
+  const mods=ROLES[S.role].modules;
+  const nav=mods.map(m=>{const meta=NAVMETA[m];const badge=m==='approvals'?approvals.length:(m==='dashboard'?0:0);
+    return `<button class="navitem ${S.view===m?'active':''}" onclick="go('${m}')"><span class="ic">${meta[0]}</span><span>${meta[1]}</span>${badge?`<span class="badge">${badge}</span>`:''}</button>`}).join('');
+  const unread=notifications.filter(n=>!n.read).length;
+  const title=NAVMETA[S.view][1];
+  return `<div class="shell">
+    <aside class="side">
+      <div class="head"><div class="logo" style="width:32px;height:32px;font-size:15px">A</div><div><div class="t">All On</div><div class="s">Portfolio Management</div></div></div>
+      <nav class="menu">${nav}</nav>
+      <div class="foot"></div>
+    </aside>
+    <div class="main">
+      <div class="top">
+        <div><h2>${title}</h2></div>
+        <div class="spacer"></div>
+        <div class="seg">${['NGN','USD'].map(c=>`<button class="${S.ccy===c?'on':''}" onclick="setCcy('${c}')">${c}</button>`).join('')}</div>
+        <button class="btn p sm" style="height:34px" onclick="toggleAI()">Ask Atlas</button>
+        <button class="iconbtn" onclick="toggleNotif()">🔔 ${unread?`<span class="dot">${unread}</span>`:''}</button>
+        <div class="userchip"><div class="avatar">${initials(S.user.name)}</div><div><div class="un">${S.user.name}</div><div class="ur">Signed in</div></div></div>
+        <button class="iconbtn" title="Sign out" onclick="signOut()">⏻</button>
+      </div>
+      ${S.notifOpen?notifPanel():''}
+      <div class="content">${viewHTML()}</div>
+      ${S.aiOpen?aiPanel():''}
+    </div>
+  </div>${S.drawer||''}${S.modal||''}`;
+}
+function initials(n){return n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}
+function go(m){S.view=m;S.notifOpen=false;render()}
+function setCcy(c){S.ccy=c;render()}
+function toggleNotif(){S.notifOpen=!S.notifOpen;if(S.notifOpen)notifications.forEach(n=>n.read=true);render()}
+function notifPanel(){return `<div class="npanel"><div style="padding:11px 14px;border-bottom:1px solid var(--line);font-weight:700;font-size:13px">Notifications</div>${notifications.map(n=>`<div class="nitem ${n.read?'':'unread'}"><span class="ni">${n.ic}</span><span>${n.txt}</span></div>`).join('')}</div>`}
+
+/* ============================ VIEWS ============================ */
+function viewHTML(){
+  switch(S.view){
+    case 'dashboard':return dashboard();
+    case 'companies':return companiesView();
+    case 'pipeline':return pipelineView();
+    case 'investments':return investmentsView();
+    case 'finance':return financeView();
+    case 'valuation':return valuationView();
+    case 'esg':return esgView();
+    case 'reports':return reportsView();
+    case 'ai':return aiView();
+    case 'approvals':return approvalsView();
+    case 'admin':return adminView();
+    case 'audit':return auditView();
+  }
+  return '';
+}
+
+/* ---- metrics ---- */
+function metrics(){
+  const nav=sum(investments,i=>i.nav);
+  const cost=sum(investments,i=>i.amount);
+  const debt=investments.filter(i=>i.type!=='Equity');
+  const eq=investments.filter(i=>i.type==='Equity');
+  const outstanding=sum(invoices.filter(v=>['Issued','Partially Paid','Overdue'].includes(v.status)),v=>v.amount);
+  const overdue=invoices.filter(v=>v.status==='Overdue').length;
+  const byType={};investments.forEach(i=>byType[i.type]=(byType[i.type]||0)+i.nav);
+  return {nav,cost,debtNav:sum(debt,i=>i.nav),eqNav:sum(eq,i=>i.nav),outstanding,overdue,byType,
+    unreal:nav-cost, docsOut:sum(companies,c=>c.docs.filter(d=>d.s!=='Submitted').length)}
+}
+
+/* ---- dashboard (role-based) ---- */
+function dashboard(){
+  const m=metrics();
+  const segs=Object.entries(m.byType).map(([k,v])=>({label:k,value:v,color:SECCLR[k]}));
+  const legend=segs.map(s=>`<div class="row" style="justify-content:space-between;font-size:12.5px;margin-bottom:6px"><span class="row" style="gap:7px">${secDot(s.label)}${s.label}</span><span class="mono" style="font-weight:600">${(s.value/m.nav*100).toFixed(0)}%</span></div>`).join('');
+  const trend=[100,101,103,102,105,108,110,109,112,115,117,119];
+
+  // role-tailored strapline + stat set
+  let stats;
+  if(S.role==='finance'||S.role==='fm'){
+    stats=[['Fund NAV',money(m.nav),'+'+((m.unreal/m.cost)*100).toFixed(1)+'% on cost','up'],
+      ['Outstanding invoices',money(m.outstanding),m.overdue+' overdue','down'],
+      ['Interest income (YTD)',money(28400000),'+6.2% vs plan','up'],
+      ['Payments received (YTD)',money(41200000),'12 receipts','up']];
+  }else if(S.role==='pm'||S.role==='im'){
+    stats=[['Portfolio companies',String(companies.length),companies.filter(c=>c.status==='Watchlist').length+' on watchlist','down'],
+      ['Portfolio NAV',money(m.nav),'+'+((m.unreal/m.cost)*100).toFixed(1)+'%','up'],
+      ['Outstanding reports',String(m.docsOut),'across '+companies.length+' companies','down'],
+      ['High-risk investments',String(companies.filter(c=>c.risk==='High').length),'require review','down']];
+  }else{
+    stats=[['Total portfolio NAV',money(m.nav),'+'+((m.unreal/m.cost)*100).toFixed(1)+'% on cost','up'],
+      ['Committed capital',money(m.cost),companies.length+' companies','up'],
+      ['Debt / Equity split',Math.round(m.debtNav/m.nav*100)+' / '+Math.round(m.eqNav/m.nav*100),'by NAV','up'],
+      ['Open approvals',String(approvals.length),'awaiting sign-off','down']];
+  }
+  const statHTML=stats.map(s=>`<div class="stat"><div class="l">${s[0]}</div><div class="v mono">${s[1]}</div><div class="d ${s[3]}">${s[2]}</div></div>`).join('');
+
+  return `
+  <div class="grid g4" style="margin-bottom:16px">${statHTML}</div>
+  <div class="grid g3">
+    <div class="card"><div class="ch"><h3>Allocation by security type</h3></div><div class="cb">
+      <div class="row" style="gap:16px"><div>${donut(segs)}</div><div style="flex:1">${legend}</div></div></div></div>
+    <div class="card" style="grid-column:span 2"><div class="ch"><h3>Portfolio value</h3><span class="cs">Growth of 100 · trailing 12 months</span></div>
+      <div class="cb">${linechart(trend)}<div class="row" style="gap:16px;margin-top:8px;font-size:12px" class="muted"><span class="muted">Indexed NAV, net</span><span class="up" style="font-weight:600">+19.0% LTD</span></div></div></div>
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card"><div class="ch"><h3>Investments by company</h3></div><div class="cb">
+      ${hbars(companies.map(c=>({l:c.name.split(' (')[0],v:sum(investments.filter(i=>i.co===c.id),i=>i.nav)})).sort((a,b)=>b.v-a.v))}</div></div>
+    <div class="card"><div class="ch"><h3>Attention needed</h3></div><div class="cb">
+      <div class="kv"><span class="k">Overdue invoices</span><span>${statusTag('Overdue')} ${m.overdue}</span></div>
+      <div class="kv"><span class="k">Outstanding company reports</span><span class="mono">${m.docsOut}</span></div>
+      <div class="kv"><span class="k">Investments in arrears / watch</span><span class="mono">${investments.filter(i=>['Arrears','Watch'].includes(i.status)).length}</span></div>
+      <div class="kv"><span class="k">Changes awaiting approval</span><span class="mono">${approvals.length}</span></div>
+    </div></div>
+  </div>`;
+}
+
+/* ---- portfolio companies ---- */
+function companiesView(){
+  const rows=companies.map(c=>{const invNav=sum(investments.filter(i=>i.co===c.id),i=>i.nav);const out=c.docs.filter(d=>d.s!=='Submitted').length;
+    return `<tr onclick="openCompany('${c.id}')" style="cursor:pointer">
+      <td><div style="font-weight:600">${c.name}</div><div class="muted small mono">${c.ref} · ${c.loc}</div></td>
+      <td>${c.sector}</td><td>${statusTag(c.status)}</td><td>${riskTag(c.risk)}</td>
+      <td class="r mono">${money(invNav)}</td>
+      <td class="r">${out?`<span class="tag t-amber">${out} outstanding</span>`:`<span class="tag t-green">Up to date</span>`}</td></tr>`}).join('');
+  return `<div class="card"><div class="ch"><div><h3>Portfolio companies</h3></div>
+      ${can('editCompany')?'<button class="btn p sm" onclick="toast(\'Demo: new-company form\')">+ Add company</button>':''}</div>
+    <table><thead><tr><th>Company</th><th>Sector</th><th>Status</th><th>Risk</th><th class="r">Invested (NAV)</th><th class="r">Reporting</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+function openCompany(id){const c=co(id);const inv=investments.filter(i=>i.co===id);
+  const invRows=inv.map(i=>`<tr><td>${secDot(i.type)} ${i.type}</td><td class="r mono">${money(i.amount)}</td><td class="r mono">${money(i.nav)}</td><td class="r">${statusTag(i.status)}</td></tr>`).join('');
+  const docRows=c.docs.map(d=>`<div class="kv"><span class="k">${d.n}</span>${statusTag(d.s)}</div>`).join('');
+  S.drawer=`<div class="scrim" onclick="closeDrawer(event)"><div class="drawer" onclick="event.stopPropagation()">
+    <div class="dh"><h3>${c.name}</h3><button class="x" onclick="closeDrawer()">×</button></div>
+    <div style="padding:18px">
+      <div class="row wrap" style="gap:8px;margin-bottom:14px">${statusTag(c.status)} ${riskTag(c.risk)} <span class="tag t-slate">${c.sector}</span> <span class="tag t-slate">${c.loc}</span></div>
+      <div class="grid g2" style="gap:10px;margin-bottom:16px">
+        <div class="kv"><span class="k">Reference</span><span class="mono">${c.ref}</span></div>
+        <div class="kv"><span class="k">Responsible (PM)</span><span>${c.pm}</span></div>
+        <div class="kv"><span class="k">Investments</span><span class="mono">${inv.length}</span></div>
+        <div class="kv"><span class="k">Total NAV</span><span class="mono">${money(sum(inv,i=>i.nav))}</span></div>
+      </div>
+      <h3 style="font-size:13px;margin:6px 0 8px">Investments</h3>
+      <table style="margin-bottom:18px"><thead><tr><th>Type</th><th class="r">Cost</th><th class="r">NAV</th><th class="r">Status</th></tr></thead><tbody>${invRows}</tbody></table>
+      <div class="row" style="justify-content:space-between;margin:6px 0 8px"><h3 style="font-size:13px;margin:0">Documents & reporting</h3>
+        ${can('editCompany')?'<button class="btn sm" onclick="toast(\'Reminder sent to company contact\')">Send reminder</button>':''}</div>
+      ${docRows}
+      <div style="margin-top:16px" class="row wrap">
+        ${can('editCompany')?`<button class="btn p sm" onclick="editRisk('${c.id}')">Change risk rating</button>`:''}
+        <button class="btn sm" onclick="toast('Demo: opens monitoring detail')">Monitoring detail</button>
+      </div>
+      ${can('editCompany')?'<p class="muted small" style="margin-top:10px">Changes to risk rating require approval from both the Investment Manager and the Finance Manager before taking effect.</p>':''}
+    </div></div></div>`;
+  render();
+}
+function closeDrawer(e){if(e&&e.target.className!=='scrim')return;S.drawer=null;render()}
+
+/* edit risk -> creates pending approval (investment-related) */
+function editRisk(id){const c=co(id);
+  S.modal=modal('Change risk rating',`
+    <div class="field"><label>Company</label><input value="${c.name}" disabled></div>
+    <div class="field"><label>Current rating</label><input value="${c.risk}" disabled></div>
+    <div class="field"><label>New rating</label><select id="newrisk"><option>Low</option><option>Medium</option><option>High</option></select></div>
+    <p class="muted small">Submitting creates a pending change requiring Investment Manager and Finance Manager approval.</p>`,
+    `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn p" onclick="submitRisk('${id}')">Submit for approval</button>`);
+  render();document.getElementById('newrisk').value=c.risk;
+}
+function submitRisk(id){const c=co(id);const nv=document.getElementById('newrisk').value;
+  if(nv===c.risk){toast('No change selected');return}
+  approvals.unshift({id:'a'+Date.now(),kind:'investment',title:`Risk rating change, ${c.name.split(' (')[0]}: ${c.risk} to ${nv}`,by:ROLES[S.role].name,apply:()=>{c.risk=nv},im:false,fm:false,ts:new Date().toISOString().slice(0,10)});
+  logAudit(`Submitted risk-rating change for ${c.name} (${c.risk}→${nv}) for approval`);
+  notify(`Risk-rating change for ${c.name.split(' (')[0]} awaiting approval`,'✅');
+  closeModal();S.drawer=null;toast('Submitted for approval');render();
+}
+
+/* ---- investments ---- */
+function investmentsView(){
+  const rows=investments.map(i=>`<tr>
+    <td><div style="font-weight:600">${coName(i.co).split(' (')[0]}</div><div class="muted small">${i.disb}</div></td>
+    <td>${secDot(i.type)} ${i.type}</td>
+    <td class="mono">${i.type==='Equity'?i.own+'% equity':i.rate+'% · '+i.tenor+'mo'}</td>
+    <td class="r mono">${money(i.amount)}</td><td class="r mono" style="font-weight:600">${money(i.nav)}</td>
+    <td class="r">${statusTag(i.status)}</td></tr>`).join('');
+  const m=metrics();
+  return `<div class="grid g4" style="margin-bottom:16px">
+    <div class="stat"><div class="l">Total invested (cost)</div><div class="v mono">${money(m.cost)}</div></div>
+    <div class="stat"><div class="l">Total NAV</div><div class="v mono">${money(m.nav)}</div></div>
+    <div class="stat"><div class="l">Debt instruments</div><div class="v mono">${investments.filter(i=>i.type!=='Equity').length}</div></div>
+    <div class="stat"><div class="l">Equity holdings</div><div class="v mono">${investments.filter(i=>i.type==='Equity').length}</div></div></div>
+    <div class="card"><div class="ch"><div><h3>All investments</h3></div></div>
+    <table><thead><tr><th>Company</th><th>Type</th><th>Terms</th><th class="r">Cost</th><th class="r">NAV</th><th class="r">Status</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="card" style="margin-top:16px"><div class="ch"><div><h3>Covenants and early-warning alerts</h3></div></div>
+    <table><thead><tr><th>Company</th><th>Covenant</th><th>Current</th><th class="r">Status</th></tr></thead><tbody>${covenants.map(cv=>`<tr><td>${coName(cv.co).split(' (')[0]}</td><td>${cv.name}</td><td class="mono">${cv.val}</td><td class="r">${cv.ok?'<span class="tag t-green">In compliance</span>':'<span class="tag t-red">Breach · alert</span>'}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+/* ---- financial admin ---- */
+function financeView(){
+  const rows=invoices.map(v=>`<tr>
+    <td class="mono">${v.no}</td><td>${coName(v.co).split(' (')[0]}</td><td class="mono">${v.due}</td>
+    <td class="r mono">${money(v.amount)}</td><td>${statusTag(v.status)}</td>
+    <td class="r">${can('invoice')&&['Issued','Partially Paid','Overdue'].includes(v.status)?`<button class="btn sm" onclick="recordPayment('${v.id}')">Record payment</button>`:(can('invoice')&&v.status==='Draft'?`<button class="btn sm p" onclick="issueInvoice('${v.id}')">Issue</button>`:'')}</td></tr>`).join('');
+  const outstanding=sum(invoices.filter(v=>['Issued','Partially Paid','Overdue'].includes(v.status)),v=>v.amount);
+  return `<div class="grid g4" style="margin-bottom:16px">
+    <div class="stat"><div class="l">Outstanding invoices</div><div class="v mono">${money(outstanding)}</div></div>
+    <div class="stat"><div class="l">Overdue</div><div class="v mono">${invoices.filter(v=>v.status==='Overdue').length}</div></div>
+    <div class="stat"><div class="l">Paid (YTD)</div><div class="v mono">${money(41200000)}</div></div>
+    <div class="stat"><div class="l">Interest income (YTD)</div><div class="v mono">${money(28400000)}</div></div></div>
+    <div class="card"><div class="ch"><div><h3>Invoices and repayments</h3></div>
+      <div class="row">${can('invoice')?'<button class="btn sm" onclick="runInterest()">Run interest calc</button><button class="btn sm" onclick="genInvoice()">Generate invoice</button>':''}
+      <button class="btn sm p" onclick="exportJournal()">Export SAP journal</button></div></div>
+    <table><thead><tr><th>Invoice</th><th>Company</th><th>Due</th><th class="r">Amount</th><th>Status</th><th class="r">Action</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="muted small" style="margin-top:10px">Phase 1 operates standalone; journals export in SAP-ready format rather than integrating directly.</p>`;
+}
+function recordPayment(id){const v=invoices.find(x=>x.id===id);v.status='Paid';logAudit(`Recorded payment against ${v.no} (${coName(v.co)})`);notify(`Payment recorded for ${v.no}`,'💰');toast('Payment recorded');render()}
+function issueInvoice(id){const v=invoices.find(x=>x.id===id);v.status='Issued';logAudit(`Issued invoice ${v.no}`);toast('Invoice issued');render()}
+function runInterest(){toast('Interest recalculated across '+investments.filter(i=>i.type!=='Equity').length+' debt instruments');logAudit('Ran interest calculation across debt portfolio');render()}
+function genInvoice(){const n='INV-26'+(10+invoices.length);invoices.push({id:'v'+Date.now(),inv:'i1',co:'c4',no:n,due:'2026-11-01',amount:2250000,status:'Draft'});logAudit(`Generated draft invoice ${n}`);notify(`Draft invoice ${n} generated`,'🧾');toast('Draft invoice generated');render()}
+function exportJournal(){const rows=[['Date','Account','Description','Debit (NGN)','Credit (NGN)']];
+  invoices.forEach(v=>{rows.push([v.due,'1200 Receivables',`${v.no} ${coName(v.co)}`,v.amount,'']);rows.push([v.due,'4000 Interest income',`${v.no} ${coName(v.co)}`,'',v.amount])});
+  downloadExcel('AllOn_SAP_journal.xls',rows);logAudit('Exported SAP-ready accounting journal');toast('SAP journal exported to Excel')}
+
+/* ---- valuation ---- */
+function valuationView(){
+  const rows=investments.map(i=>{const chg=(i.nav-i.amount)/i.amount*100;return `<tr>
+    <td>${coName(i.co).split(' (')[0]}</td><td>${secDot(i.type)} ${i.type}</td>
+    <td class="r mono">${money(i.amount)}</td><td class="r mono" style="font-weight:600">${money(i.nav)}</td>
+    <td class="r mono ${chg>=0?'up':'down'}">${chg>=0?'+':''}${chg.toFixed(1)}%</td>
+    <td class="mono muted">30 Jun 2026</td></tr>`}).join('');
+  return `<div class="card"><div class="ch"><div><h3>Investment valuation</h3></div>
+      <button class="btn sm" onclick="downloadValuation()">Export valuation</button></div>
+    <table><thead><tr><th>Company</th><th>Type</th><th class="r">Cost</th><th class="r">Fair value</th><th class="r">Change</th><th>Valued</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function downloadValuation(){const rows=[['Company','Type','Cost NGN','Fair value NGN','Valuation date']];investments.forEach(i=>rows.push([coName(i.co),i.type,i.amount,i.nav,'2026-06-30']));downloadExcel('AllOn_valuation.xls',rows);toast('Valuation exported to Excel')}
+
+/* ---- reports ---- */
+function reportsView(){
+  const reps={Portfolio:['Portfolio summary','Portfolio company listing','Investment listing','Portfolio valuation','Investment performance','Information rights status'],
+    Finance:['Outstanding invoices','Invoice history','Payment history','Repayment schedules','Interest calculations','Outstanding receivables'],
+    Management:['Portfolio performance','Portfolio exposure','Security type analysis','Investment ageing','Risk summary','Exception report']};
+  const block=(t,arr)=>`<div class="card"><div class="ch"><h3>${t} reports</h3></div><div class="cb">${arr.map(r=>`<div class="kv"><span>${r}</span><span class="row"><button class="btn sm" onclick="dlReport('${r}','xlsx')">Excel</button><button class="btn sm" onclick="dlReport('${r}','pdf')">PDF</button></span></div>`).join('')}</div></div>`;
+  return `<div class="grid g3">${block('Portfolio',reps.Portfolio)}${block('Finance',reps.Finance)}${block('Management',reps.Management)}</div>`;
+}
+function dlReport(name,fmt){if(fmt==='pdf'){toast('“'+name+'” prepared as PDF (demo)');return}const rows=[[name],['Generated',new Date().toISOString().slice(0,10)],[]];rows.push(['Company','Type','NAV NGN']);investments.forEach(i=>rows.push([coName(i.co),i.type,i.nav]));downloadExcel(name.replace(/ /g,'_')+'.xls',rows);toast('“'+name+'” exported to Excel')}
+
+/* ---- approvals (dual sign-off) ---- */
+function approvalsView(){
+  if(!approvals.length)return `<div class="card"><div class="empty">No changes awaiting approval. Everything is up to date.</div></div>`;
+  const rows=approvals.map(a=>{
+    const needRole=a.kind==='investment'?'Investment Manager':'Finance Manager';
+    const imBtn=`<span class="tag ${a.im?'t-green':'t-slate'}">IM ${a.im?'✓':'pending'}</span>`;
+    const fmBtn=`<span class="tag ${a.fm?'t-green':'t-slate'}">FM ${a.fm?'✓':'pending'}</span>`;
+    let action='';
+    if(can('approveInv')&&!a.im)action+=`<button class="btn sm p" onclick="approve('${a.id}','im')">Approve as IM</button>`;
+    if(can('approveFin')&&!a.fm)action+=`<button class="btn sm p" onclick="approve('${a.id}','fm')">Approve as FM</button>`;
+    if((can('approveInv')||can('approveFin')))action+=`<button class="btn sm d" onclick="reject('${a.id}')">Reject</button>`;
+    if(!action)action=`<span class="muted small">Both sign-offs required</span>`;
+    return `<tr><td><div style="font-weight:600">${a.title}</div><div class="muted small">${a.kind==='investment'?'Investment-related':'Finance-related'} · by ${a.by} · ${a.ts}</div></td>
+      <td class="row" style="gap:6px">${imBtn}${fmBtn}</td><td class="r"><div class="row wrap" style="justify-content:flex-end">${action}</div></td></tr>`}).join('');
+  return `<div class="card"><div class="ch"><div><h3>Pending approvals</h3></div></div>
+    <table><thead><tr><th>Change</th><th>Sign-off</th><th class="r">Action</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function approve(id,as){const a=approvals.find(x=>x.id===id);if(!a)return;a[as]=true;logAudit(`${as.toUpperCase()} approved: ${a.title}`);
+  if(a.im&&a.fm){a.apply();logAudit(`Change effective (both approvals obtained): ${a.title}`);notify('Change applied: '+a.title,'✅');approvals=approvals.filter(x=>x.id!==id);toast('Both approvals in, change applied')}
+  else{toast('Approved. Awaiting the other sign-off.')}
+  render();
+}
+function reject(id){const a=approvals.find(x=>x.id===id);approvals=approvals.filter(x=>x.id!==id);logAudit(`Rejected change: ${a.title}`);toast('Change rejected');render()}
+
+/* ---- administration ---- */
+function adminView(){
+  const users=[['O. Adeyemi','System Administrator','Active'],['A. Okafor','Portfolio Management Team','Active'],['C. Eze','Finance Team','Active'],['J. Musa','Investment Manager','Active'],['B. Danladi','Finance Manager','Active'],['Board Viewer','Read-only User','Active']];
+  const urows=users.map(u=>`<tr><td><div class="row" style="gap:9px"><span class="avatar" style="width:26px;height:26px;font-size:11px">${initials(u[0])}</span><span style="font-weight:600">${u[0]}</span></div></td><td>${u[1]}</td><td>${statusTag(u[2])}</td><td class="r"><button class="btn sm" onclick="toast('Demo: edit user')">Manage</button></td></tr>`).join('');
+  const caps=[['View portfolio & reports','✓','✓','✓','✓'],['Edit company / monitoring','–','✓','–','–'],['Edit investment financials','–','–','✓','–'],['Approve changes','–','–','–','✓'],['User administration','✓','–','–','–']];
+  const permRows=caps.map(c=>`<div>${c[0]}</div><div class="${c[1]==='✓'?'yes':'no'}">${c[1]}</div><div class="${c[2]==='✓'?'yes':'no'}">${c[2]}</div><div class="${c[3]==='✓'?'yes':'no'}">${c[3]}</div><div class="${c[4]==='✓'?'yes':'no'}">${c[4]}</div>`).join('');
+  return `<div class="grid g2">
+    <div class="card"><div class="ch"><div><h3>Users</h3><span class="cs">${users.length} accounts</span></div><button class="btn p sm" onclick="toast('Demo: invite user')">+ Add user</button></div>
+      <table><thead><tr><th>User</th><th>Role</th><th>Status</th><th class="r"></th></tr></thead><tbody>${urows}</tbody></table></div>
+    <div class="card"><div class="ch"><h3>Roles & permissions</h3></div><div class="cb">
+      <div class="perm"><div class="hd">Capability</div><div class="hd">Admin</div><div class="hd">PM</div><div class="hd">Finance</div><div class="hd">Mgr</div>${permRows}</div></div></div>
+  </div>`;
+}
+
+/* ---- audit ---- */
+function auditView(){
+  const rows=audit.map(a=>`<tr><td class="mono muted" style="white-space:nowrap">${a.ts}</td><td>${a.user}</td><td>${a.act}</td></tr>`).join('');
+  return `<div class="card"><div class="ch"><div><h3>Audit trail</h3></div></div>
+    <table><thead><tr><th>Timestamp</th><th>User / role</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+/* ---- modal utils ---- */
+function modal(title,body,foot){return `<div class="modal-scrim" onclick="if(event.target.className==='modal-scrim')closeModal()"><div class="modal">
+  <div class="dh"><h3>${title}</h3><button class="x" onclick="closeModal()">×</button></div>
+  <div style="padding:18px">${body}</div>
+  <div style="padding:14px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px">${foot}</div></div></div>`}
+function closeModal(){S.modal=null;render()}
+
+/* ---- csv ---- */
+function downloadCSV(fn,rows){const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const b=new Blob([csv],{type:'text/csv'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=fn;a.click();URL.revokeObjectURL(u)}
+
+/* ============================ EXTRA DATA ============================ */
+const esgData={
+  c1:{mwh:0,co2:3200,conn:0,jobs:180,women:34,rating:'A'},
+  c2:{mwh:8600,co2:6100,conn:24000,jobs:210,women:29,rating:'A'},
+  c3:{mwh:4200,co2:2900,conn:52000,jobs:140,women:41,rating:'B'},
+  c4:{mwh:5100,co2:3600,conn:31000,jobs:160,women:33,rating:'A'},
+  c5:{mwh:2600,co2:1800,conn:9000,jobs:70,women:22,rating:'C'},
+  c6:{mwh:1900,co2:1300,conn:47000,jobs:95,women:38,rating:'B'},
+};
+let pipeline=[
+  {name:'Sample C&I Solar Co',sector:'C&I Solar',stage:'Due Diligence',ticket:95000000,lead:'A. Okafor'},
+  {name:'Sample Clean Cooking Co',sector:'Clean Cooking',stage:'IC Review',ticket:60000000,lead:'I. Bello'},
+  {name:'Sample Distribution Co',sector:'Distribution',stage:'Screening',ticket:120000000,lead:'A. Okafor'},
+  {name:'Sample SHS Co',sector:'Solar Home Systems',stage:'Sourcing',ticket:45000000,lead:'I. Bello'},
+  {name:'Sample Mini-grid Co (Bonny)',sector:'Mini-grids',stage:'Committed',ticket:150000000,lead:'A. Okafor'},
+];
+const covenants=[
+  {co:'c2',name:'DSCR \u2265 1.20x',val:'1.28x',ok:true},
+  {co:'c5',name:'DSCR \u2265 1.20x',val:'0.94x',ok:false},
+  {co:'c5',name:'Reporting current',val:'Overdue',ok:false},
+  {co:'c1',name:'Gearing \u2264 60%',val:'48%',ok:true},
+  {co:'c3',name:'Min. liquidity \u20A615M',val:'\u20A618M',ok:true},
+];
+function esgTag(r){const m={A:'t-green',B:'t-amber',C:'t-red'};return `<span class="tag ${m[r]||'t-slate'}">ESG ${r}</span>`}
+
+/* ============================ EXCEL ============================ */
+function downloadExcel(fn,rows){
+  const html='<table border="1">'+rows.map((r,i)=>'<tr>'+r.map(c=>`<${i===0?'th':'td'}>${String(c==null?'':c)}</${i===0?'th':'td'}>`).join('')+'</tr>').join('')+'</table>';
+  const b=new Blob(['\uFEFF<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],{type:'application/vnd.ms-excel'});
+  const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=fn;a.click();URL.revokeObjectURL(u);
+}
+
+/* ============================ AI ASSISTANT ============================ */
+function toggleAI(){S.aiOpen=!S.aiOpen;render();if(S.aiOpen)setTimeout(()=>{const c=document.getElementById('chatbox');if(c)c.scrollTop=c.scrollHeight},40)}
+function askQuick(q){S.chat.push({role:'user',text:q});S.chat.push({role:'ai',text:answerAI(q)});render();setTimeout(()=>{const c=document.getElementById('chatbox');if(c)c.scrollTop=c.scrollHeight},30)}
+function askAtlas(){const el=document.getElementById('aiq');if(!el)return;const q=(el.value||'').trim();if(!q)return;askQuick(q)}
+function aiPanel(){
+  const msgs=S.chat.map(m=>m.role==='user'
+    ?`<div style="align-self:flex-end;background:var(--navy);color:#fff;padding:9px 12px;border-radius:12px 12px 3px 12px;max-width:82%;font-size:13px">${m.text}</div>`
+    :`<div style="align-self:flex-start;background:#f1f5f9;padding:9px 12px;border-radius:12px 12px 12px 3px;max-width:88%;font-size:13px;line-height:1.5">${m.text}</div>`).join('');
+  const chips=['Which invoices are overdue?','What is our total portfolio value?','Which companies have outstanding reports?','Show high-risk investments','Summarise our impact'];
+  return `<div class="scrim" onclick="if(event.target.className==='scrim')toggleAI()"><div class="drawer" style="display:flex;flex-direction:column">
+    <div class="dh"><div><h3 style="margin:0">Ask Atlas</h3><div class="muted small">AI assistant</div></div><button class="x" onclick="toggleAI()">\u00D7</button></div>
+    <div style="padding:9px 16px;border-bottom:1px solid var(--line)" class="row wrap">
+      <span class="tag ${S.mcp.claude?'t-green':'t-slate'}">${S.mcp.claude?'\u2713 ':''}Claude (MCP)</span>
+      <span class="tag ${S.mcp.chatgpt?'t-green':'t-slate'}">${S.mcp.chatgpt?'\u2713 ':''}ChatGPT (MCP)</span></div>
+    <div id="chatbox" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px">${msgs||'<div class="muted small">Ask a question about the portfolio, or try a suggestion below.</div>'}</div>
+    <div style="padding:10px 12px;border-top:1px solid var(--line)"><div class="row wrap" style="gap:6px;margin-bottom:8px">${chips.map(c=>`<button class="btn sm" onclick="askQuick('${c.replace(/'/g,"\\'")}')">${c}</button>`).join('')}</div>
+      <div class="row" style="gap:8px"><input id="aiq" placeholder="Ask about invoices, NAV, risk, impact\u2026" style="flex:1;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:13px" onkeydown="if(event.key==='Enter')askAtlas()"><button class="btn p" onclick="askAtlas()">Send</button></div></div>
+  </div></div>`;
+}
+function answerAI(q){
+  const s=q.toLowerCase();const m=metrics();
+  if(s.includes('overdue')){const ov=invoices.filter(v=>v.status==='Overdue');if(!ov.length)return 'No invoices are currently overdue.';return `There ${ov.length===1?'is':'are'} <b>${ov.length}</b> overdue invoice${ov.length>1?'s':''}, totalling <b>${money(sum(ov,v=>v.amount))}</b>:<br>`+ov.map(v=>`\u2022 ${v.no} \u00B7 ${coName(v.co).split(' (')[0]} \u00B7 ${money(v.amount)} (due ${v.due})`).join('<br>')}
+  if((s.includes('outstanding')||s.includes('report')||s.includes('document'))&&!s.includes('invoice')){const cs=companies.filter(c=>c.docs&&c.docs.some(d=>d.s!=='Submitted'));return `<b>${cs.length}</b> companies have outstanding or overdue reports:<br>`+cs.map(c=>`\u2022 ${c.name.split(' (')[0]} \u00B7 ${c.docs.filter(d=>d.s!=='Submitted').map(d=>d.n).join(', ')}`).join('<br>')}
+  if(s.includes('nav')||s.includes('value')||s.includes('worth')){return `Total portfolio NAV is <b>${moneyFull(m.nav)}</b> against committed cost of <b>${moneyFull(m.cost)}</b>, an unrealised gain of <b>${moneyFull(m.unreal)}</b> (+${(m.unreal/m.cost*100).toFixed(1)}%). Debt is ${Math.round(m.debtNav/m.nav*100)}% and equity ${Math.round(m.eqNav/m.nav*100)}% of NAV.`}
+  if(s.includes('risk')||s.includes('arrears')||s.includes('watch')){const hi=investments.filter(i=>['Arrears','Watch'].includes(i.status));const hc=companies.filter(c=>c.risk==='High');return `<b>${hc.length}</b> high-risk company (${hc.map(c=>c.name.split(' (')[0]).join(', ')||'none'}) and <b>${hi.length}</b> investment${hi.length>1?'s':''} in arrears/watch:<br>`+hi.map(i=>`\u2022 ${coName(i.co).split(' (')[0]} \u00B7 ${i.type} \u00B7 ${i.status} (NAV ${money(i.nav)})`).join('<br>')}
+  if(s.includes('exposure')||s.includes('concentration')||s.includes('biggest')||s.includes('largest')){const by=companies.map(c=>({n:c.name.split(' (')[0],v:sum(investments.filter(i=>i.co===c.id),i=>i.nav)})).sort((a,b)=>b.v-a.v);return `Largest exposures by NAV:<br>`+by.slice(0,4).map(x=>`\u2022 ${x.n} \u00B7 ${money(x.v)} (${(x.v/m.nav*100).toFixed(0)}%)`).join('<br>')}
+  if(s.includes('approval')||s.includes('pending')){if(!approvals.length)return 'No changes are awaiting approval.';return `<b>${approvals.length}</b> change${approvals.length>1?'s':''} awaiting approval:<br>`+approvals.map(a=>`\u2022 ${a.title} (${a.im?'IM \u2713':'IM pending'}, ${a.fm?'FM \u2713':'FM pending'})`).join('<br>')}
+  if(s.includes('interest')||s.includes('income')){return `Interest income year-to-date is <b>${money(28400000)}</b>, running +6.2% against plan. The next interest run regenerates invoices from current repayment schedules.`}
+  if(s.includes('impact')||s.includes('esg')||s.includes('co2')||s.includes('carbon')||s.includes('energy')||s.includes('women')){const mwh=Object.values(esgData).reduce((a,b)=>a+b.mwh,0);const co2=Object.values(esgData).reduce((a,b)=>a+b.co2,0);const conn=Object.values(esgData).reduce((a,b)=>a+b.conn,0);return `Portfolio impact to date: <b>${mwh.toLocaleString()} MWh</b> clean energy delivered, <b>${co2.toLocaleString()} t</b> CO\u2082 avoided, and <b>${conn.toLocaleString()}</b> people/connections served across ${companies.length} companies.`}
+  return `I answer from your live portfolio data. Try: overdue invoices, total NAV, outstanding company reports, high-risk investments, largest exposures, pending approvals, interest income, or impact metrics. In production I connect to Claude or ChatGPT through an MCP server so your team can ask these from their own AI assistant.`;
+}
+
+/* ============================ AI & AUTOMATION MODULE ============================ */
+function aiView(){
+  return `<div class="grid g2">
+    <div class="card"><div class="ch"><h3>Ask Atlas</h3></div><div class="cb">
+      <p class="muted small" style="margin-top:0">Ask questions about the portfolio in plain language.</p>
+      <button class="btn p" onclick="toggleAI()">Open assistant</button></div></div>
+    <div class="card"><div class="ch"><h3>Connect your AI assistant (MCP)</h3></div><div class="cb">
+      <p class="muted small" style="margin-top:0">Connect the portfolio to your own AI tools through a secure MCP server.</p>
+      <div class="kv"><span>Claude</span><button class="btn sm ${S.mcp.claude?'':'p'}" onclick="connectMCP('claude')">${S.mcp.claude?'Connected \u2713':'Connect'}</button></div>
+      <div class="kv"><span>ChatGPT</span><button class="btn sm ${S.mcp.chatgpt?'':'p'}" onclick="connectMCP('chatgpt')">${S.mcp.chatgpt?'Connected \u2713':'Connect'}</button></div></div></div>
+    <div class="card"><div class="ch"><h3>AI data import</h3></div><div class="cb">
+      <p class="muted small" style="margin-top:0">Upload company financials or an investment schedule as Excel or PDF. Atlas extracts the records for review before import.</p>
+      <button class="btn" onclick="openImport()">\u2B06 Upload Excel / PDF</button></div></div>
+    <div class="card"><div class="ch"><h3>AI-generated commentary</h3></div><div class="cb">
+      <button class="btn" onclick="genCommentary()">Generate portfolio commentary</button>
+      ${S.commentary?`<div style="margin-top:12px;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px;line-height:1.55">${S.commentary}</div>`:''}</div></div>
+    <div class="card" style="grid-column:1 / -1"><div class="ch"><h3>Automation & scheduled jobs</h3></div><div class="cb">
+      <div class="kv"><span>Automatic invoice generation from repayment schedules</span><span class="tag t-green">Daily</span></div>
+      <div class="kv"><span>Payment reminders for outstanding invoices</span><span class="tag t-green">Weekly</span></div>
+      <div class="kv"><span>Document submission reminders to portfolio companies</span><span class="tag t-green">Weekly</span></div>
+      <div class="kv"><span>Valuation refresh & exception checks</span><span class="tag t-amber">Quarterly</span></div></div></div>
+  </div>`;
+}
+function connectMCP(k){S.mcp[k]=!S.mcp[k];const nm=k==='claude'?'Claude':'ChatGPT';logAudit((S.mcp[k]?'Connected':'Disconnected')+' '+nm+' via MCP');toast(nm+(S.mcp[k]?' connected via MCP':' disconnected'));render()}
+function genCommentary(){const m=metrics();const ov=invoices.filter(v=>v.status==='Overdue').length;
+  S.commentary=`Portfolio NAV stands at <b>${moneyFull(m.nav)}</b>, up ${(m.unreal/m.cost*100).toFixed(1)}% on committed cost, led by the equity holdings in Green Delta Power and Delta Solar Manufacturing. Debt performance is broadly stable, with ${ov} invoice${ov!==1?'s':''} overdue and one investment (Coastal C&I Solar) in arrears requiring a workout plan. Reporting compliance is the main operational gap, with ${m.docsOut} company reports outstanding. Recommended focus: resolve the Coastal C&I arrears and chase Riverline's overdue Q2 accounts.`;
+  logAudit('Generated AI portfolio commentary');toast('Commentary generated');render();
+}
+function openImport(){S.modal=modal('AI data import',`
+  <div style="border:2px dashed var(--line);border-radius:12px;padding:20px;text-align:center;margin-bottom:12px"><div style="font-size:26px">\uD83D\uDCC4</div><div style="font-weight:600;font-size:13px">AllOn_new_investments.xlsx</div><div class="muted small">Simulated upload \u00B7 12 KB</div></div>
+  <div class="small" style="font-weight:600;margin-bottom:6px">AI extracted 2 investments for review:</div>
+  <table><thead><tr><th>Company</th><th>Type</th><th class="r">Amount</th></tr></thead><tbody>
+    <tr><td>Sample Mini-grid Co</td><td>Straight Debt</td><td class="r mono">\u20A6110M</td></tr>
+    <tr><td>Sample Mini-grid Co</td><td>Equity</td><td class="r mono">\u20A645M</td></tr></tbody></table>`,
+  `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn p" onclick="confirmImport()">Import 2 records</button>`);render()}
+function confirmImport(){
+  if(!companies.find(c=>c.id==='c7'))companies.push({id:'c7',name:'Sample Mini-grid Co',ref:'ALLON-PC-007',sector:'Mini-grids',loc:'Bonny, Rivers',status:'Active',risk:'Low',pm:'A. Okafor',docs:[{n:'Annual Financial Statements 2025',s:'Submitted'}]});
+  investments.push({id:'i'+(investments.length+1),co:'c7',type:'Straight Debt',ccy:'NGN',amount:110000000,rate:12.5,tenor:36,disb:'2026-09-01',maturity:'2029-09-01',status:'Performing',nav:110000000});
+  investments.push({id:'i'+(investments.length+1),co:'c7',type:'Equity',ccy:'NGN',amount:45000000,own:9,disb:'2026-09-01',status:'Held',nav:45000000});
+  logAudit('Imported 2 investments via AI data import (Excel)');notify('AI import: 2 investments added (Sample Mini-grid Co)','\u2705');closeModal();toast('2 records imported');render();
+}
+
+/* ============================ ESG & IMPACT ============================ */
+function esgView(){
+  const tot={mwh:0,co2:0,conn:0,jobs:0};Object.values(esgData).forEach(e=>{tot.mwh+=e.mwh;tot.co2+=e.co2;tot.conn+=e.conn;tot.jobs+=e.jobs});
+  const rows=companies.filter(c=>esgData[c.id]).map(c=>{const e=esgData[c.id];return `<tr><td style="font-weight:600">${c.name.split(' (')[0]}</td>
+    <td class="r mono">${e.mwh.toLocaleString()}</td><td class="r mono">${e.co2.toLocaleString()}</td><td class="r mono">${e.conn.toLocaleString()}</td>
+    <td class="r mono">${e.jobs}</td><td class="r mono">${e.women}%</td><td>${esgTag(e.rating)}</td></tr>`}).join('');
+  return `<div class="grid g4" style="margin-bottom:16px">
+    <div class="stat"><div class="l">Clean energy delivered</div><div class="v mono">${(tot.mwh/1000).toFixed(1)}<span style="font-size:13px"> GWh</span></div></div>
+    <div class="stat"><div class="l">CO\u2082 avoided</div><div class="v mono">${tot.co2.toLocaleString()}<span style="font-size:13px"> t</span></div></div>
+    <div class="stat"><div class="l">People connected</div><div class="v mono">${(tot.conn/1000).toFixed(0)}k</div></div>
+    <div class="stat"><div class="l">Jobs supported</div><div class="v mono">${tot.jobs.toLocaleString()}</div></div></div>
+    <div class="card"><div class="ch"><div><h3>ESG and impact monitoring</h3></div>
+      <button class="btn sm" onclick="downloadExcel('AllOn_ESG_impact.xls',esgRows())">Export to Excel</button></div>
+    <table><thead><tr><th>Company</th><th class="r">Energy (MWh)</th><th class="r">CO\u2082 avoided (t)</th><th class="r">Connections</th><th class="r">Jobs</th><th class="r">Women %</th><th>ESG</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function esgRows(){const r=[['Company','Energy MWh','CO2 avoided t','Connections','Jobs','Women %','ESG rating']];companies.filter(c=>esgData[c.id]).forEach(c=>{const e=esgData[c.id];r.push([c.name,e.mwh,e.co2,e.conn,e.jobs,e.women,e.rating])});return r}
+
+/* ============================ DEAL PIPELINE ============================ */
+function pipelineView(){
+  const stages=['Sourcing','Screening','Due Diligence','IC Review','Committed'];
+  const tiles=stages.map(st=>`<div class="stat"><div class="l">${st}</div><div class="v mono">${pipeline.filter(p=>p.stage===st).length}</div></div>`).join('');
+  const stTag=st=>{const m={'Sourcing':'t-slate','Screening':'t-sky','Due Diligence':'t-violet','IC Review':'t-amber','Committed':'t-green'};return `<span class="tag ${m[st]||'t-slate'}">${st}</span>`};
+  const rows=pipeline.map(p=>`<tr><td style="font-weight:600">${p.name}</td><td>${p.sector}</td><td>${stTag(p.stage)}</td><td class="r mono">${money(p.ticket)}</td><td>${p.lead}</td></tr>`).join('');
+  return `<div class="grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:16px;gap:12px">${tiles}</div>
+    <div class="card"><div class="ch"><div><h3>Deal pipeline</h3></div>
+      ${(can('editCompany')||S.role==='im')?'<button class="btn p sm" onclick="toast(\'Demo: add prospective deal\')">+ Add deal</button>':''}</div>
+    <table><thead><tr><th>Company</th><th>Sector</th><th>Stage</th><th class="r">Ticket</th><th>Lead</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+/* boot */
+render();
+</script>
+</body>
+</html>
