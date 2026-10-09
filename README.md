@@ -1,13 +1,15 @@
 # All On / Atlas Portfolio Management
 
-The main page at / contains the complete AllOn_Atlas (1).html application, preserved without changing its source features. The original Atlas public/private markets prototype remains available at /atlas.html. Both entries are included in the Vite production build.
+The main page at / contains the updated single-file All On application. It includes dated FX translation, document submission tracking, equity administration, company contacts and boards, information rights, and management concentration and exception views. The original Atlas public/private markets prototype remains available at /atlas.html. Both entries are included in the Vite production build.
 
 ## All On modules
 
 - Dashboard: NAV, cost, gains, portfolio allocation, performance and exceptions
-- Portfolio companies: profiles, documents, monitoring and risk amendments
+- Management review: concentration by sector and security, high-risk exposures, repayment and governance exceptions
+- Portfolio companies: RC Number, TIN, contacts, management, boards, document due dates and submission metadata, information rights, board meetings and risk amendments
 - Deal pipeline: stages, prospective investments and ticket summaries
-- Investments: debt, equity, convertible debt, mezzanine and working capital
+- Investments: original NGN/USD amounts, debt, equity share classes, co-investors and transaction histories
+- FX and currency: dated illustrative rates, original fair values and naira equivalents
 - Financial administration: invoices, payment recording, interest action and SAP journal export
 - Valuation: investment NAV and valuation export
 - ESG and impact: energy, emissions, connections, jobs, gender and Excel export
@@ -35,7 +37,7 @@ npm run build
 npm run preview
 ```
 
-Tests cover all permitted role views in both currencies, two-stage approvals, invoice issuance/payment/generation, sample import, assistant responses, commentary, exports and audit updates.
+Tests cover all permitted role views in both currencies, dated FX translation and unchanged booked cost, document and governance detail, equity records, two-stage approvals, invoice issuance/payment/generation, sample import, assistant responses, commentary, exports and audit updates. FX snapshots hold original fair values constant to demonstrate currency translation. Document reminders create demo in-app notifications and do not send email.
 
 ## Deployment
 

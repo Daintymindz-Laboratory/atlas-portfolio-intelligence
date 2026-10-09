@@ -22,7 +22,7 @@ function boot() {
 test('all six roles render every permitted module in both currencies', () => {
   const { evaluate } = boot();
   assert.equal(evaluate('Object.keys(ROLES).length'), 6);
-  assert.equal(evaluate('Object.keys(NAVMETA).length'), 12);
+  assert.equal(evaluate('Object.keys(NAVMETA).length'), 14);
   evaluate(`for (const role of Object.keys(ROLES)) {
     signIn(role);
     for (const ccy of ['NGN', 'USD']) {
@@ -34,6 +34,33 @@ test('all six roles render every permitted module in both currencies', () => {
     }
     signOut();
   }`);
+});
+
+test('dated FX translation preserves original USD values and booked cost', () => {
+  const { evaluate } = boot();
+  const initial = evaluate('metrics().nav');
+  evaluate("signIn('admin'); selectValuationDate('2026-06-30')");
+  assert.equal(evaluate("originalValue(investments.find(i => i.ccy === 'USD'))"), 256250);
+  assert.equal(evaluate("investments.find(i => i.ccy === 'USD').amount"), 400000000);
+  assert.equal(evaluate('metrics().nav'), initial + 256250 * 15);
+  evaluate("selectValuationDate('2026-09-30')");
+  assert.equal(evaluate('metrics().nav'), initial);
+});
+
+test('company governance, documents, contacts and equity details render', () => {
+  const { evaluate } = boot();
+  evaluate("signIn('admin'); openCompany('c2')");
+  for (const text of ['RC Number', 'TIN', 'Contact persons', 'Board members', 'Uploading user / timestamp', 'Information rights', 'Board meetings']) {
+    assert.ok(evaluate('S.drawer').includes(text), text);
+  }
+  assert.equal(evaluate("co('c2').docs.length"), 5);
+  assert.ok(evaluate("notifications.some(n => n.id.startsWith('doc-c2-'))"));
+  evaluate("closeDrawer(); openEquity('i6')");
+  for (const text of ['Co-investors', 'Capital injection', 'Dividend received', 'Capital return', 'Exit']) {
+    assert.ok(evaluate('S.drawer').includes(text), text);
+  }
+  evaluate("closeDrawer(); go('management')");
+  assert.ok(evaluate("document.getElementById('app').innerHTML").includes('Management exception list'));
 });
 
 test('risk amendment applies only after both approval stages', () => {
