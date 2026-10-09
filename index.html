@@ -547,19 +547,6 @@ function approve(id,as){const a=approvals.find(x=>x.id===id);if(!a)return;a[as]=
 function reject(id){const a=approvals.find(x=>x.id===id);approvals=approvals.filter(x=>x.id!==id);logAudit(`Rejected change: ${a.title}`);toast('Change rejected');render()}
 
 /* ---- administration ---- */
-function adminView(){
-  const users=[['O. Adeyemi','System Administrator','Active'],['A. Okafor','Portfolio Management Team','Active'],['C. Eze','Finance Team','Active'],['J. Musa','Investment Manager','Active'],['B. Danladi','Finance Manager','Active'],['Board Viewer','Read-only User','Active']];
-  const urows=users.map(u=>`<tr><td><div class="row" style="gap:9px"><span class="avatar" style="width:26px;height:26px;font-size:11px">${initials(u[0])}</span><span style="font-weight:600">${u[0]}</span></div></td><td>${u[1]}</td><td>${statusTag(u[2])}</td><td class="r"><button class="btn sm" onclick="toast('Demo: edit user')">Manage</button></td></tr>`).join('');
-  const caps=[['View portfolio & reports','✓','✓','✓','✓'],['Edit company / monitoring','–','✓','–','–'],['Edit investment financials','–','–','✓','–'],['Approve changes','–','–','–','✓'],['User administration','✓','–','–','–']];
-  const permRows=caps.map(c=>`<div>${c[0]}</div><div class="${c[1]==='✓'?'yes':'no'}">${c[1]}</div><div class="${c[2]==='✓'?'yes':'no'}">${c[2]}</div><div class="${c[3]==='✓'?'yes':'no'}">${c[3]}</div><div class="${c[4]==='✓'?'yes':'no'}">${c[4]}</div>`).join('');
-  return `<div class="grid g2">
-    <div class="card"><div class="ch"><div><h3>Users</h3><span class="cs">${users.length} accounts</span></div><button class="btn p sm" onclick="toast('Demo: invite user')">+ Add user</button></div>
-      <table><thead><tr><th>User</th><th>Role</th><th>Status</th><th class="r"></th></tr></thead><tbody>${urows}</tbody></table></div>
-    <div class="card"><div class="ch"><h3>Roles & permissions</h3></div><div class="cb">
-      <div class="perm"><div class="hd">Capability</div><div class="hd">Admin</div><div class="hd">PM</div><div class="hd">Finance</div><div class="hd">Mgr</div>${permRows}</div></div></div>
-  </div>`;
-}
-
 /* ---- audit ---- */
 function auditView(){
   const rows=audit.map(a=>`<tr><td class="mono muted" style="white-space:nowrap">${a.ts}</td><td>${a.user}</td><td>${a.act}</td></tr>`).join('');
@@ -808,6 +795,48 @@ function downloadImportTemplate(){downloadCSV('Atlas_sample_schedule.csv',[['Com
 const baseCompaniesView=companiesView;companiesView=()=>`<p class="muted small">Select a company to view its profile, documents and governance. Add a company to prepare a new draft.</p>`+baseCompaniesView()+draftsHTML('companies');
 const baseInvestmentsView=investmentsView;investmentsView=()=>`<p class="muted small">Review holdings, add an investment, or import a schedule. New entries are kept as drafts.</p>`+baseInvestmentsView()+draftsHTML('investments');
 const basePipelineView=pipelineView;pipelineView=()=>basePipelineView()+draftsHTML('deals');
+
+/* Session-only administration demonstrator. */
+const adminUsers=[
+ {id:'u1',name:'Olu Adeyemi',email:'olu.adeyemi@allon.example',role:'admin',status:'Active'},
+ {id:'u2',name:'Amaka Okafor',email:'amaka.okafor@allon.example',role:'pm',status:'Active'},
+ {id:'u3',name:'Chidinma Eze',email:'chidinma.eze@allon.example',role:'finance',status:'Active'},
+ {id:'u4',name:'Jibril Musa',email:'jibril.musa@allon.example',role:'im',status:'Active'},
+ {id:'u5',name:'Binta Danladi',email:'binta.danladi@allon.example',role:'fm',status:'Active'},
+ {id:'u6',name:'Board Viewer',email:'board.viewer@allon.example',role:'viewer',status:'Active'}
+];
+const ROLE_CAPABILITIES=[
+ {label:'View portfolio, reports and audit',roles:['admin','pm','finance','im','fm','viewer']},
+ {label:'Manage companies and governance',roles:['admin','pm']},
+ {label:'Prepare investments, invoices and imports',roles:['admin','finance']},
+ {label:'Approve as Investment Manager',roles:['admin','im']},
+ {label:'Approve as Finance Manager',roles:['admin','fm']},
+ {label:'Add users and assign roles',roles:['admin']},
+ {label:'Deactivate, reactivate and delete users',roles:['admin']}
+];
+function adminView(){if(!can('admin'))return '<div class="card"><div class="empty">User administration is available to the System Administrator.</div></div>';
+ const active=adminUsers.filter(u=>u.status==='Active').length;
+ return `<div class="card" style="margin-bottom:16px"><div class="ch"><div><h3>System Administrator workspace</h3><span class="cs">Access, roles and user lifecycle</span></div><span class="tag t-slate">Administrator only</span></div><div class="cb"><p class="small" style="margin:0">Add users, assign any of the six roles, and manage account access. Use Manage to change a role, deactivate access or delete an account.</p><p class="muted small" style="margin-bottom:0">Demo changes apply to this session and appear in the audit trail. Role sign-in cards remain available for the presentation.</p></div></div>
+ <div class="grid g3" style="margin-bottom:16px"><div class="stat"><div class="l">User accounts</div><div class="v">${adminUsers.length}</div></div><div class="stat"><div class="l">Active accounts</div><div class="v">${active}</div></div><div class="stat"><div class="l">Available roles</div><div class="v">6</div></div></div>
+ <div class="card"><div class="ch"><h3>User directory</h3><button class="btn p sm" onclick="openUser()">+ Add user</button></div><div class="table-scroll"><table><thead><tr><th>User</th><th>Assigned role</th><th>Access</th><th class="r">Action</th></tr></thead><tbody>${adminUsers.map(u=>`<tr><td><strong>${safeText(u.name)}</strong><div class="muted small">${safeText(u.email)}</div></td><td>${ROLES[u.role].name}</td><td><span class="tag ${u.status==='Active'?'t-green':'t-slate'}">${u.status}</span></td><td class="r"><button class="btn sm" onclick="openUser('${u.id}')">Manage</button></td></tr>`).join('')}</tbody></table></div></div>
+ <div class="card" style="margin-top:16px"><div class="ch"><h3>Roles and permissions</h3><span class="cs">IM and FM are separate approval responsibilities</span></div><div class="table-scroll"><table><thead><tr><th>Capability</th>${Object.values(ROLES).map(r=>`<th>${r.name}</th>`).join('')}</tr></thead><tbody>${ROLE_CAPABILITIES.map(c=>`<tr><td>${c.label}</td>${Object.keys(ROLES).map(r=>`<td><span class="${c.roles.includes(r)?'yes':'no'}">${c.roles.includes(r)?'Allowed':'View only / unavailable'}</span></td>`).join('')}</tr>`).join('')}</tbody></table></div></div>
+ <div class="grid g3" style="margin-top:16px">${Object.entries(ROLES).map(([key,r])=>`<div class="card"><div class="ch"><h3>${r.name}</h3></div><div class="cb"><p class="muted small" style="margin-top:0">${r.desc}</p><span class="tag t-slate">${adminUsers.filter(u=>u.role===key).length} assigned users</span></div></div>`).join('')}</div>`;
+}
+function openUser(id){if(!can('admin'))return;const u=adminUsers.find(x=>x.id===id);if(id&&!u)return;
+ entryModal(u?'Manage user':'Add user',`<form id="user-form" onsubmit="event.preventDefault();saveUser('${u?u.id:''}')"><div class="grid g2">${entryField('Full name','user-name',u?u.name:'')}${entryField('Email address','user-email',u?u.email:'','email')}</div><div class="field"><label for="user-role">Assigned role</label><select id="user-role">${Object.entries(ROLES).map(([k,r])=>`<option value="${k}" ${k===(u?u.role:'viewer')?'selected':''}>${r.name}</option>`).join('')}</select></div><div class="field"><label for="user-status">Account access</label><select id="user-status"><option ${!u||u.status==='Active'?'selected':''}>Active</option><option ${u&&u.status==='Inactive'?'selected':''}>Inactive</option></select></div><p class="muted small">Inactive accounts represent revoked access. At least one active System Administrator must remain.</p><p id="user-error" class="down small" role="alert"></p></form>`,` ${u?`<button class="btn d" onclick="confirmDeleteUser('${u.id}')">Delete user</button>`:''}<button class="btn" onclick="closeModal()">Cancel</button><button class="btn p" type="submit" form="user-form">${u?'Save changes':'Add user'}</button>`);
+}
+function lastAdmin(u,nextRole,nextStatus){return u&&u.role==='admin'&&u.status==='Active'&&(nextRole!=='admin'||nextStatus!=='Active')&&adminUsers.filter(x=>x.role==='admin'&&x.status==='Active').length===1}
+function saveUser(id){if(!can('admin'))return;const form=document.getElementById('user-form');if(!form.reportValidity())return;
+ const u=adminUsers.find(x=>x.id===id);if(id&&!u)return;
+ const name=document.getElementById('user-name').value.trim(),email=document.getElementById('user-email').value.trim(),role=document.getElementById('user-role').value,status=document.getElementById('user-status').value;
+ const error=document.getElementById('user-error');if(!name){error.textContent='Enter a full name.';return}if(!ROLES[role]||!['Active','Inactive'].includes(status))return;
+ if(adminUsers.some(x=>x.id!==id&&x.email.toLowerCase()===email.toLowerCase())){error.textContent='A user with this email already exists.';return}if(lastAdmin(u,role,status)){error.textContent='Keep at least one active System Administrator.';return}
+ if(u){logAudit('Updated demo user '+safeText(name)+': '+ROLES[u.role].name+' to '+ROLES[role].name+', access '+u.status+' to '+status);Object.assign(u,{name,email,role,status})}else{adminUsers.push({id:'u'+Date.now(),name,email,role,status});logAudit('Added demo user '+safeText(name)+' with role '+ROLES[role].name)}closeModal();go('admin');toast('User directory updated for this demo session.');
+}
+function confirmDeleteUser(id){if(!can('admin'))return;const u=adminUsers.find(x=>x.id===id);if(!u)return;if(lastAdmin(u,'viewer','Inactive')){toast('Keep at least one active System Administrator.');return}
+ entryModal('Delete user',`<p>Remove <strong>${safeText(u.name)}</strong> from the demo user directory?</p><p class="muted small">${safeText(u.email)}. ${ROLES[u.role].name}.</p><p class="muted small">This removes the session account entry. The audit history is retained.</p>`,`<button class="btn" onclick="openUser('${id}')">Cancel</button><button class="btn d" onclick="deleteUser('${id}')">Delete user</button>`);
+}
+function deleteUser(id){if(!can('admin'))return;const u=adminUsers.find(x=>x.id===id);if(!u||lastAdmin(u,'viewer','Inactive'))return;adminUsers.splice(adminUsers.indexOf(u),1);logAudit('Deleted demo user '+safeText(u.name));closeModal();go('admin');toast('User removed from the demo directory.');}
 
 /* boot */
 render();

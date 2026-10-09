@@ -87,6 +87,22 @@ test('entry workflows save session drafts without changing seeded values', () =>
   assert.equal(evaluate('demoDrafts.companies.length'), 1);
 });
 
+test('administrator permissions are explicit and deletion is role guarded', () => {
+  const { evaluate } = boot();
+  evaluate("signIn('admin'); go('admin')");
+  const rendered = evaluate("document.getElementById('app').innerHTML");
+  for (const text of ['System Administrator workspace', 'User directory', 'Roles and permissions', 'Approve as Investment Manager', 'Approve as Finance Manager']) {
+    assert.ok(rendered.includes(text), text);
+  }
+  evaluate("deleteUser('u1')");
+  assert.equal(evaluate('adminUsers.length'), 6);
+  evaluate("signIn('viewer'); deleteUser('u6')");
+  assert.equal(evaluate('adminUsers.length'), 6);
+  evaluate("signIn('admin'); deleteUser('u6')");
+  assert.equal(evaluate('adminUsers.length'), 5);
+  assert.ok(evaluate("audit.some(a => a.act === 'Deleted demo user Board Viewer')"));
+});
+
 test('invoices, payments, import, assistant, exports and audit remain operational', () => {
   const { evaluate, downloads } = boot();
   evaluate("signIn('admin'); issueInvoice('v6'); recordPayment('v4'); genInvoice()");

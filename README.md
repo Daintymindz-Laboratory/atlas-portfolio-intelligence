@@ -16,7 +16,7 @@ The main page at / contains the updated single-file All On application. It inclu
 - Reports: portfolio, finance, valuation and reporting exports
 - AI and automation: portfolio assistant, commentary, simulated import and MCP toggles
 - Approvals: two-stage investment/finance approval and rejection
-- Administration: user listing and permission matrix
+- Administration: six-role permission matrix, user creation, role reassignment, access deactivation/reactivation and confirmed deletion, with session audit entries and protection for the last active administrator
 - Audit trail and notifications
 
 Six role profiles and NGN/USD display are preserved.
