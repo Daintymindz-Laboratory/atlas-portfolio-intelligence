@@ -12,6 +12,7 @@ function boot() {
     document: {
       getElementById: id => elements[id] ??= { innerHTML: '', value: '', appendChild() {} },
       createElement: () => ({ click() { downloads.push(this.download); }, remove() {} }),
+      querySelector: () => ({ classList: { add() {} } }),
     },
     setTimeout() {}, Blob, URL, console,
   });
@@ -72,15 +73,30 @@ test('risk amendment applies only after both approval stages', () => {
   assert.equal(evaluate("approvals.some(a => a.id === 'a1')"), false);
 });
 
+test('entry workflows save session drafts without changing seeded values', () => {
+  const { evaluate } = boot();
+  const nav = evaluate('metrics().nav');
+  evaluate("signIn('admin'); entryDraft={kind:'company',name:'Bonny Clean Energy Ltd',sector:'Mini-grids',location:'Bonny, Rivers'}; saveEntry()");
+  evaluate("entryDraft={kind:'investment',company:'Bonny Clean Energy Ltd',type:'Straight Debt',currency:'USD',amount:'125000'}; saveEntry()");
+  assert.equal(evaluate('demoDrafts.companies.length'), 1);
+  assert.equal(evaluate('demoDrafts.investments.length'), 1);
+  assert.equal(evaluate('companies.length'), 6);
+  assert.equal(evaluate('investments.length'), 9);
+  assert.equal(evaluate('metrics().nav'), nav);
+  evaluate("signIn('viewer'); entryDraft={kind:'company',name:'Blocked entry'}; saveEntry()");
+  assert.equal(evaluate('demoDrafts.companies.length'), 1);
+});
+
 test('invoices, payments, import, assistant, exports and audit remain operational', () => {
   const { evaluate, downloads } = boot();
   evaluate("signIn('admin'); issueInvoice('v6'); recordPayment('v4'); genInvoice()");
   assert.equal(evaluate("invoices.find(v => v.id === 'v4').status"), 'Paid');
   assert.equal(evaluate("invoices.find(v => v.id === 'v6').status"), 'Issued');
   assert.equal(evaluate('invoices.length'), 7);
-  evaluate('confirmImport()');
-  assert.equal(evaluate('investments.length'), 11);
-  assert.equal(evaluate('companies.length'), 7);
+  evaluate("showImportPreview('sample.csv', true); confirmImport()");
+  assert.equal(evaluate('investments.length'), 9);
+  assert.equal(evaluate('companies.length'), 6);
+  assert.equal(evaluate('demoDrafts.investments.length'), 2);
   assert.match(evaluate("answerAI('total portfolio value')"), /NAV/);
   evaluate("askQuick('Which invoices are overdue?'); genCommentary(); exportJournal(); downloadValuation(); downloadExcel('impact.xls', esgRows())");
   assert.equal(evaluate('S.chat.length'), 2);

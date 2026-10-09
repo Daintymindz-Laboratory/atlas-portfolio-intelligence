@@ -1,4 +1,4 @@
-# All On / Atlas Portfolio Management
+# Atlas | Investment and Portfolio Management
 
 The main page at / contains the updated single-file All On application. It includes dated FX translation, document submission tracking, equity administration, company contacts and boards, information rights, and management concentration and exception views. The original Atlas public/private markets prototype remains available at /atlas.html. Both entries are included in the Vite production build.
 
@@ -23,7 +23,9 @@ Six role profiles and NGN/USD display are preserved.
 
 ## Source behavior and limits
 
-This is the supplied browser prototype. Role selection is a demo login; permissions are UI controls rather than server-side authorization. Changes are held in memory and reset when the page reloads. AI responses use local rules, MCP connections are simulated toggles, import inserts predefined sample records, and scheduled jobs are display-only. User management and adding pipeline deals show demo messages. Interest recalculation logs a demo action. Excel exports are HTML .xls files, as in the supplied source. No backend or external service integrations were present in the HTML.
+Atlas is the product name. All On is the client portfolio. Company, investment and deal actions open validated forms with a review step and save entries to separate session draft lists. Seeded portfolio values remain unchanged. Investment imports accept a local Excel, CSV or PDF file and show an explicitly simulated sample extraction preview; file contents are not parsed or uploaded. A downloadable sample CSV and a built-in sample schedule are available.
+
+Role selection is a demo login; permissions are UI controls rather than server-side authorization. Changes are held in memory and reset when the page reloads. AI responses use local rules, MCP connections are simulated toggles, and scheduled jobs are display-only. User management shows demo messages. Interest recalculation logs a demo action. Excel exports are HTML .xls files. No backend or external service integrations are included.
 
 ## Development and verification
 
